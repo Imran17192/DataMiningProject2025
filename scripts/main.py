@@ -32,5 +32,8 @@ if __name__ == "__main__":
     eda_x_df = eda_x.compute_eda("x_data_frame", plot=False)
 
     feature_engineered_x = FeatureEngineering(eda_x_df)
+    feature_engineered_x.compute_features()
+
+
 
     print("Hello World")
