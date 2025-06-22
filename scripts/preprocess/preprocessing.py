@@ -16,21 +16,23 @@ for filename in filenames:
 		dataframes.append(pd.read_json(file))
 
 def information(dataframe):
-    print(f"Shape: {dataframe.shape}")
-    print()
-    print(f"Data types:\n{dataframe.dtypes}")
-    print()
-    print(f"Number of null values per column:\n{dataframe.isnull().sum()}")
-    print()
-    print(f"Descriptive statistics:\n{dataframe.describe}")
-    print()
-    print(f"Number of unique values per column:\n{dataframe.nunique()}")
-    print()
-    print(f"Number of duplicated rows: {dataframe.duplicated().sum()}")
-    print()
-    print(f"Head:\n{dataframe.head}")
-    print()
-    print(f"Tail:\n{dataframe.tail}")
+	print("-" * 100)
+	print(f"Shape: {dataframe.shape}")
+	print("-" * 50)
+	print(f"Data types:\n{dataframe.dtypes}")
+	print("-" * 50)
+	print(f"Number of null values per column:\n{dataframe.isnull().sum()}")
+	print("-" * 50)
+	print(f"Descriptive statistics:\n{dataframe.describe}")
+	print("-" * 50)
+	print(f"Number of unique values per column:\n{dataframe.nunique()}")
+	print("-" * 50)
+	print(f"Number of duplicated rows: {dataframe.duplicated().sum()}")
+	print("-" * 50)
+	print(f"Head:\n{dataframe.head}")
+	print("-" * 50)
+	print(f"Tail:\n{dataframe.tail}")
+	print("-" * 100)
 
 def remove_outliers(dataframe):
 	Q1 = dataframe.quantile(1/4)
@@ -39,9 +41,9 @@ def remove_outliers(dataframe):
 	IQR = Q3 - Q1
 
 	lower_bound = Q1 - 1.5 * IQR
-    upper_bound = Q3 + 1.5 * IQR
+	upper_bound = Q3 + 1.5 * IQR
 
-    return dataframe[~((dataframe < lower_bound) | (dataframe > upper_bound)).any(axis=1)]
+	return dataframe[~((dataframe < lower_bound) | (dataframe > upper_bound)).any(axis=1)]
 
 def standardize(dataframe):
 	return (dataframe - dataframe.mean()) / dataframe.std()
