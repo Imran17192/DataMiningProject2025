@@ -4,6 +4,10 @@ import os
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.decomposition import PCA
 
 repo_path = git.Repo(__file__, search_parent_directories=True).working_dir
 data_x_path = os.path.join(repo_path, "data", "x")
@@ -63,3 +67,29 @@ preprocessed_dataframes = []
 for dataframe in dataframes:
 	preprocessed_dataframe = center(standardize(remove_outliers(dataframe)))
 	preprocessed_dataframes.append(preprocessed_dataframe)
+
+def visualize(dataframe, title=None, type="heatmap"):
+	plt.figure(figsize=(12, 10))
+	if type == "heatmap":
+		sns.heatmap(dataframe.corr(), annot=False, cmap='coolwarm', fmt='.2f', square=True)
+		plt.title("Correlation" if not title else title)
+	else:
+		if len(dataframe.columns) > 2:
+			pca = PCA(n_components=2)
+			pca_result = pca.fit_transform(dataframe)
+			plt.scatter(pca_result[:, 0], pca_result[:, 1], alpha=0.7, c='blue')
+			plt.xlabel('x')
+			plt.ylabel('y')
+			plt.title("Visualization of main components" if not title else title)
+		else:
+			plt.scatter(dataframe[0], dataframe[1], color='blue', label='')
+			plt.xlabel('x')
+			plt.ylabel('y')
+			plt.title("Visualization" if not title else title)
+	plt.show()
+
+for dataframe in preprocessed_dataframes:
+	visualize(dataframe)
+
+for dataframe in preprocessed_dataframes:
+	visualize(dataframe, type="scatter")
