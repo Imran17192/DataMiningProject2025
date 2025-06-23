@@ -1,8 +1,13 @@
+import math
 import pandas as pd
 import numpy as np
 from sklearn import preprocessing
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import KBinsDiscretizer
+
+
+
 
 class FeatureEngineering:
     def __init__(self, dfs):
@@ -15,6 +20,19 @@ class FeatureEngineering:
             dfs_norm.append(df_norm)
         return dfs_norm
 
+    def bins_sturges(self, n):
+        return int(np.ceil(np.log2(n)) + 1)
+
+    def discretise_df(self):
+        dfs_disc = []
+        for df in self.dfs:
+            number_bins = self.bins_sturges(df.shape[0])
+            equal_width_discretizer = KBinsDiscretizer(n_bins= number_bins, encode='ordinal', strategy='uniform')
+            num_cols = df.select_dtypes(include=[np.number]).columns
+            df_disc = df.copy()
+            df_disc[num_cols] = equal_width_discretizer.fit_transform(df[num_cols])
+            dfs_disc.append(df_disc)
+        return df_disc
 
     def compute_features(self):
         for df in self.dfs:
