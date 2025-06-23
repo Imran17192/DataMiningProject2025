@@ -91,5 +91,5 @@ def visualize(dataframe, title=None, type="heatmap"):
 for dataframe in preprocessed_dataframes:
 	visualize(dataframe)
 
-for dataframe in preprocessed_dataframes:
-	visualize(dataframe, type="scatter")
+for i, dataframe in enumerate(preprocessed_dataframes):
+	visualize(dataframe, title=f"Scatter plot of x{i} after PCA", type="scatter")
