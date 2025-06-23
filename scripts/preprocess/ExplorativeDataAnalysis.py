@@ -65,12 +65,6 @@ class ExplorativeDataAnalysis:
             plt.show()
 
 
-    def standardize_df(self, dfs):
-        dfs_std = []
-        for df in dfs:
-            df_std = (df - df.mean()) / df.std()
-            dfs_std.append(df_std)
-        return dfs_std
 
 
     def normalize_df(self, dfs):
@@ -85,7 +79,7 @@ class ExplorativeDataAnalysis:
         for df in dfs:
             # hist creates plot for all columns of df columns and bins for amount of pillars
             df.hist(bins=100, figsize=(15, 10))
-            plt.suptitle("Histogram plot of x dataframe")
+            plt.suptitle("Histogram plot of dataframe")
             plt.show()
 
     def plot_kernel(self, dfs):
@@ -104,16 +98,23 @@ class ExplorativeDataAnalysis:
         for df in dfs:
             corr = df.corr()
             plt.figure(figsize=(15, 10))
-            sns.heatmap(
-                corr,
-                cmap="RdBu_r",
-                center=0,
-                vmin=-1, vmax=1,
-                square=True,
-                linecolor="white",
-            )
+            sns.heatmap(corr, cmap="RdBu_r", center=0, vmin=-1, vmax=1, square=True, linecolor="white")
             plt.show()
 
+    def plot_index_scatter(self, dfs):
+        for df in dfs:
+            D = df.shape[1]
+            square_root = math.ceil(D ** 0.5)
+            fig, axes = plt.subplots(nrows=square_root, ncols=square_root,
+                                     figsize=(15, 10), constrained_layout=True)
+            axes = axes.flatten()
+            for i in range(D):
+                axes[i].scatter(df.index, df.iloc[:, i], alpha=0.5,
+                                 marker='x', s=10)
+                axes[i].set_title(f'Feature {df.columns[i]}')
+                axes[i].set_xlabel('Index')
+                axes[i].set_ylabel('Value')
+            plt.show()
 
     def compute_eda(self, name, plot = False):
         df_clean = self.remove_oultiers(self.dfs)
@@ -127,7 +128,7 @@ class ExplorativeDataAnalysis:
             self.plot_bar(df_stand)
             self.plot_kernel(df_stand)
             self.plot_heat(df_stand)
-
+            self.plot_index_scatter(df_stand)
         return df_stand
 
     #-------------------------------------------------------------------
