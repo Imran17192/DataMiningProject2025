@@ -19,9 +19,9 @@ def analysiere_daten(daten, name):
     print("Maximalwerte:", np.max(daten, axis=0))
     print("-----------------------------------------------------")
 
-def zeige_scatter(daten, titel, farbe='blue'):
+def plot(daten, titel):
     plt.figure(figsize=(8, 6))
-    plt.scatter(daten[:, 0], daten[:, 1], alpha=0.5, s=5, color=farbe)
+    plt.scatter(daten[:, 0], daten[:, 1], alpha=0.5, s=5)
     plt.title(titel)
     plt.xlabel("Merkmal 0")
     plt.ylabel("Merkmal 1")
@@ -45,9 +45,9 @@ analysiere_daten(x1, "x1.json")
 analysiere_daten(x2, "x2.json")
 
 # Daten werden hier geplottet
-zeige_scatter(x0, "Scatter Plot für x0.json", 'blue')
-zeige_scatter(x1, "Scatter Plot für x1.json", 'green')
-zeige_scatter(x2, "Scatter Plot für x2.json", 'red')
+plot(x0, "Scatter Plot für x0.json")
+plot(x1, "Scatter Plot für x1.json")
+plot(x2, "Scatter Plot für x2.json")
 
 # Normalisierung
 x0_norm = min_max_normalisieren(x0)
@@ -56,14 +56,14 @@ x2_norm = min_max_normalisieren(x2)
 
 print("Normalisierung abgeschlossen.")
 
-zeige_scatter(x1_norm, "Scatter Plot für normalisiertes x1.json", 'green')
+plot(x1_norm, "Scatter Plot für normalisiertes x1.json")
 
 # PCA auf x1
 pca = PCA(n_components=2)
 x1_pca = pca.fit_transform(x1_norm)
 
 print(f"PCA abgeschlossen: Neue Form {x1_pca.shape}")
-zeige_scatter(x1_pca, "PCA: x1.json auf 2D reduziert", 'purple')
+plot(x1_pca, "PCA: x1.json auf 2D reduziert")
 
 # Dichteanalyse x2
 plt.figure(figsize=(8, 6))
@@ -77,15 +77,24 @@ plt.show()
 
 # Ausreißeranalyse x0
 schwelle = 50
-maske = (np.abs(x0[:, 0]) < schwelle) & (np.abs(x0[:, 1]) < schwelle)
-x0_kern, x0_ausreisser = x0[maske], x0[~maske]
+
+# Betrag der ersten beiden Merkmale berechnen
+merkmal_0_betrag = np.abs(x0[:, 0])
+merkmal_1_betrag = np.abs(x0[:, 1])
+
+# Maske: nur die Punkte, bei denen beide Merkmale unter der Schwelle liegen
+maske = (merkmal_0_betrag < schwelle) & (merkmal_1_betrag < schwelle)
+
+# Aufteilen in Kern und Ausreißer
+x0_kern = x0[maske]
+x0_ausreisser = x0[~maske]
 
 print(f"Kernpunkte: {len(x0_kern)}")
 print(f"Ausreißer: {len(x0_ausreisser)}")
 
 plt.figure(figsize=(8, 6))
-plt.scatter(x0_kern[:, 0], x0_kern[:, 1], alpha=0.5, s=10, label='Kern', color='blue')
-plt.scatter(x0_ausreisser[:, 0], x0_ausreisser[:, 1], alpha=1.0, s=50, label='Ausreißer', color='red')
+plt.scatter(x0_kern[:, 0], x0_kern[:, 1], alpha=0.5, s=10, label='Kern')
+plt.scatter(x0_ausreisser[:, 0], x0_ausreisser[:, 1], alpha=1.0, s=50, label='Ausreißer')
 plt.title("x0.json: Kern vs. Ausreißer")
 plt.xlabel("Merkmal 0")
 plt.ylabel("Merkmal 1")
