@@ -29,7 +29,7 @@ if __name__ == "__main__":
     df_x, df_ds1 = load_data()
 
     eda_x =  ExplorativeDataAnalysis(df_x)
-    eda_x_df = eda_x.compute_eda("x_data_frame", plot=False)
+    eda_x_df = eda_x.compute_eda("x_data_frame", plot=True)
 
     feature_engineered_x = FeatureEngineering(eda_x_df)
     feature_engineered_x.compute_features()
