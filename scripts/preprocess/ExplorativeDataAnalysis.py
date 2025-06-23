@@ -65,6 +65,12 @@ class ExplorativeDataAnalysis:
             plt.show()
 
 
+    def standardize_df(self, dfs):
+        dfs_std = []
+        for df in dfs:
+            df_std = (df - df.mean()) / df.std()
+            dfs_std.append(df_std)
+        return dfs_std
 
 
     def normalize_df(self, dfs):
