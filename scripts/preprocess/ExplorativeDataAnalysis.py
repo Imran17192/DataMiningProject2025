@@ -126,11 +126,13 @@ class ExplorativeDataAnalysis:
         df_clean = self.remove_oultiers(self.dfs)
         df_stand = self.standardize_df(df_clean)
 
-        self.inspect_dataframe(self.dfs, name)
-        self.inspect_dataframe(df_clean, name)
-        self.inspect_dataframe(df_stand, name)
+
 
         if plot == True:
+            self.inspect_dataframe(self.dfs, name)
+            self.inspect_dataframe(df_clean, name)
+            self.inspect_dataframe(df_stand, name)
+
             self.plot_bar(df_stand)
             self.plot_kernel(df_stand)
             self.plot_heat(df_stand)
@@ -138,4 +140,3 @@ class ExplorativeDataAnalysis:
         return df_stand
 
     #-------------------------------------------------------------------
-
