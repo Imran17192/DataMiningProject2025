@@ -1,13 +1,9 @@
-import math
 import pandas as pd
 import numpy as np
 from sklearn import preprocessing
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import KBinsDiscretizer
-
-
-
 
 class FeatureEngineering:
     def __init__(self, dfs):
@@ -43,11 +39,11 @@ class FeatureEngineering:
             pca = PCA()
             # does all pca math
             pca.fit(scaled_data)
-            # coordinates for pca graph based on the loading scores and the sclaed data
+            # coordinates for pca graph based on the loading scores and the scaled data
             pca_data = pca.transform(scaled_data)
-            # claclulate percentage of variation that each pc accounts for
+            # calculate percentage of variation that each pc accounts for
             per_var = np.round(pca.explained_variance_ratio_ * 100, decimals=1)
-            # create labels for screee plot
+            # create labels for scree plot
             labels = ['PC' + str(x) for x in range(1, len(per_var) + 1)]
 
             plt.bar(x=range(1, len(per_var)+1), height=per_var, tick_label=labels)
