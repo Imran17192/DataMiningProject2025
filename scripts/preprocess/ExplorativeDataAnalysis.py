@@ -1,13 +1,8 @@
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-import Paths
-from pandas.plotting import scatter_matrix, autocorrelation_plot
 import math
 import seaborn as sns
-
 
 class ExplorativeDataAnalysis:
     def __init__(self, dfs):
@@ -25,7 +20,7 @@ class ExplorativeDataAnalysis:
             print("tail:")
             print(df.tail())
             # class of the object, index range so how many line, column rang so how many columns
-            # detailed descr of the colums, so amount, column name, how many lines arent null, datatype of datapoint
+            # detailed descr of the columns, so amount, column name, how many lines aren't null, datatype of datapoint
             # shows memory usage
             print("info:")
             print(df.info())
@@ -41,7 +36,7 @@ class ExplorativeDataAnalysis:
             i += 1
 
 
-    def remove_oultiers(self, dfs):
+    def remove_outliers(self, dfs):
         df_cleaned = []
         for df in dfs:
             Q1 = df.quantile(0.25)
@@ -123,19 +118,17 @@ class ExplorativeDataAnalysis:
             plt.show()
 
     def compute_eda(self, name, plot = False):
-        df_clean = self.remove_oultiers(self.dfs)
+        df_clean = self.remove_outliers(self.dfs)
         df_stand = self.standardize_df(df_clean)
 
         self.inspect_dataframe(self.dfs, name)
         self.inspect_dataframe(df_clean, name)
         self.inspect_dataframe(df_stand, name)
 
-        if plot == True:
+        if plot:
             self.plot_bar(df_stand)
             self.plot_kernel(df_stand)
             self.plot_heat(df_stand)
             self.plot_index_scatter(df_stand)
+
         return df_stand
-
-    #-------------------------------------------------------------------
-
