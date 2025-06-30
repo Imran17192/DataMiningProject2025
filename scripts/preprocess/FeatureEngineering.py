@@ -34,7 +34,7 @@ class FeatureEngineering:
             dfs_disc.append(df_disc)
         return dfs_disc
 
-    def compute_features(self, threshold = 0.8, dim_redu_count=1,show_plots: bool = True  ):
+    def compute_features(self, threshold = 0.9, dim_redu_count=1,show_plots: bool = True  ):
         dfs_pca = []
         for df in self.dfs:
             scaled_data = preprocessing.scale(df.T)
@@ -43,8 +43,6 @@ class FeatureEngineering:
 
             cum_var = np.cumsum(pca.explained_variance_ratio_)
             n_components = np.searchsorted(cum_var, threshold) + 1
-
-            print(n_components)
 
             orig_dim = df.shape[1]
             use_pca = (orig_dim - n_components) >= dim_redu_count

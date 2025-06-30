@@ -122,9 +122,10 @@ class ExplorativeDataAnalysis:
                 axes[i].set_ylabel('Value')
             plt.show()
 
-    def compute_eda(self, name, plot = False):
-        df_clean = self.remove_oultiers(self.dfs)
-        df_stand = self.standardize_df(df_clean)
+    def compute_eda(self, name, plot = False, clean=False):
+        if clean == True:
+            df_clean = self.remove_oultiers(self.dfs)
+            df_stand = self.standardize_df(df_clean)
 
 
 
@@ -137,6 +138,14 @@ class ExplorativeDataAnalysis:
             self.plot_kernel(df_stand)
             self.plot_heat(df_stand)
             self.plot_index_scatter(df_stand)
+        else:
+            self.inspect_dataframe(self.dfs, name)
+
+            self.plot_bar(self.dfs)
+            self.plot_kernel(self.dfs)
+            self.plot_heat(self.dfs)
+            self.plot_index_scatter(self.dfs)
+
         return df_stand
 
     #-------------------------------------------------------------------

@@ -28,29 +28,29 @@ def dm_part1():
     df_x, df_ds1 = load_data()
 
     eda_x = ExplorativeDataAnalysis(df_x)
-    eda_x_df = eda_x.compute_eda("x_data_frame", plot=False)
+    eda_x_df = eda_x.compute_eda("x_data_frame", plot=False,clean=True)
 
     eda_da1 = ExplorativeDataAnalysis(df_ds1)
-    eda_da1_df = eda_da1.compute_eda("x_data_frame", plot=False)
+    eda_da1_df = eda_da1.compute_eda("x_data_frame", plot=False,clean=True)
 
     feature_engineered_x = FeatureEngineering(eda_x_df)
-    pca_x = feature_engineered_x.compute_features()
+    pca_x = feature_engineered_x.compute_features(show_plots=False)
 
     feature_engineered_ds1 = FeatureEngineering(eda_da1_df)
-    pca_ds1 = feature_engineered_ds1.compute_features()
+    pca_ds1 = feature_engineered_ds1.compute_features(show_plots=False)
+
+    eda_x = ExplorativeDataAnalysis(pca_x)
+    eda_x_df = eda_x.compute_eda("x_data_frame", plot=True)
 
     return pca_x, pca_ds1
 
 
-def dm_part2():
-    clustering_x = Clustering()
-
-    return 0
+def dm_part2(df1, df2):
+   return 0
 
 
 if __name__ == "__main__":
 
     df_x, df_ds1 = dm_part1()
-    df_x, df_ds1 = dm_part2()
 
     print("Hello World")
