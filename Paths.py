@@ -29,3 +29,12 @@ X2_DIR = X_DIR.joinpath('x2.json')
 #
 DS1_DIR = iterate_folder_json_paths(X_DIR.joinpath('12_8_2_12_13'))
 DS2_DIR = X_DIR.joinpath("13_8_5_19_8_12").joinpath("13_8_5_19_8_12").joinpath('.json')
+
+
+#
+Y_DIR = DATA_DIR.joinpath('y')
+
+Y0_DIR = Y_DIR.joinpath('y0.json')
+Y1_DIR = Y_DIR.joinpath('y1.json')
+Y2_DIR = Y_DIR.joinpath('y2.json')
+
