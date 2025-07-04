@@ -1,13 +1,9 @@
-import math
 import pandas as pd
 import numpy as np
 from sklearn import preprocessing
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import KBinsDiscretizer
-
-
-
 
 class FeatureEngineering:
     def __init__(self, dfs):

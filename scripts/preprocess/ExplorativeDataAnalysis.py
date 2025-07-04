@@ -8,7 +8,6 @@ from pandas.plotting import scatter_matrix, autocorrelation_plot
 import math
 import seaborn as sns
 
-
 class ExplorativeDataAnalysis:
     def __init__(self, dfs):
         self.dfs = dfs
@@ -25,7 +24,7 @@ class ExplorativeDataAnalysis:
             print("tail:")
             print(df.tail())
             # class of the object, index range so how many line, column rang so how many columns
-            # detailed descr of the colums, so amount, column name, how many lines arent null, datatype of datapoint
+            # detailed descr of the columns, so amount, column name, how many lines aren't null, datatype of datapoint
             # shows memory usage
             print("info:")
             print(df.info())
@@ -41,7 +40,7 @@ class ExplorativeDataAnalysis:
             i += 1
 
 
-    def remove_oultiers(self, dfs):
+    def remove_outliers(self, dfs):
         df_cleaned = []
         for df in dfs:
             Q1 = df.quantile(0.25)
