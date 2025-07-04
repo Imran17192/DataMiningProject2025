@@ -1,4 +1,4 @@
-import Paths
+import paths
 import pandas as pd
 from scripts.preprocess.ExplorativeDataAnalysis import ExplorativeDataAnalysis
 from scripts.preprocess.FeatureEngineering import FeatureEngineering
@@ -7,25 +7,25 @@ from scripts.unsupervised_learning.Clustering import Clustering
 
 def load_data():
     df_x = []
-    df_x0 = pd.read_json(Paths.X0_DIR)
-    df_x1 = pd.read_json(Paths.X1_DIR)
-    df_x2 = pd.read_json(Paths.X2_DIR)
+    df_x0 = pd.read_json(paths.X0_DIR)
+    df_x1 = pd.read_json(paths.X1_DIR)
+    df_x2 = pd.read_json(paths.X2_DIR)
 
     df_x.append(df_x0)
     df_x.append(df_x1)
     df_x.append(df_x2)
 
     df_y = []
-    df_y0 = pd.read_json(Paths.Y0_DIR)
-    df_y1 = pd.read_json(Paths.Y1_DIR)
-    df_y2 = pd.read_json(Paths.Y2_DIR)
+    df_y0 = pd.read_json(paths.Y0_DIR)
+    df_y1 = pd.read_json(paths.Y1_DIR)
+    df_y2 = pd.read_json(paths.Y2_DIR)
 
     df_y.append(df_y0)
     df_y.append(df_y1)
     df_y.append(df_y2)
 
     df_ds1 = []
-    for p in Paths.DS1_DIR:
+    for p in paths.DS1_DIR:
         df = pd.read_json(p)
         df_ds1.append(df)
 
