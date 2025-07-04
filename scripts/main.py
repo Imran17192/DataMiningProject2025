@@ -2,6 +2,7 @@ import Paths
 import pandas as pd
 from scripts.preprocess.ExplorativeDataAnalysis import ExplorativeDataAnalysis
 from scripts.preprocess.FeatureEngineering import FeatureEngineering
+from scripts.unsupervised_learning.Clustering import Clustering
 
 
 def load_data():
@@ -14,6 +15,15 @@ def load_data():
     df_x.append(df_x1)
     df_x.append(df_x2)
 
+    df_y = []
+    df_y0 = pd.read_json(Paths.Y0_DIR)
+    df_y1 = pd.read_json(Paths.Y1_DIR)
+    df_y2 = pd.read_json(Paths.Y2_DIR)
+
+    df_y.append(df_y0)
+    df_y.append(df_y1)
+    df_y.append(df_y2)
+
     df_ds1 = []
     for p in Paths.DS1_DIR:
         df = pd.read_json(p)
@@ -21,12 +31,10 @@ def load_data():
 
     # DS2 not a pandas datframe so do it later. it is also just  for puzzle
 
-    return df_x, df_ds1
+    return df_x, df_ds1, df_y
 
 
-def dm_part1():
-    df_x, df_ds1 = load_data()
-
+def dm_part1(df_x, df_ds1):
     eda_x = ExplorativeDataAnalysis(df_x)
     eda_x_df = eda_x.compute_eda("x_data_frame", plot=False,clean=True)
 
@@ -39,18 +47,22 @@ def dm_part1():
     feature_engineered_ds1 = FeatureEngineering(eda_da1_df)
     pca_ds1 = feature_engineered_ds1.compute_features(show_plots=False)
 
-    eda_x = ExplorativeDataAnalysis(pca_x)
-    eda_x_df = eda_x.compute_eda("x_data_frame", plot=True)
-
-    return pca_x, pca_ds1
+    return eda_x_df, eda_da1_df
 
 
 def dm_part2(df1, df2):
-   return 0
+    kmean = Clustering(df1)
+    dbscan = Clustering(df1)
+
+    kmean.run_k_means(opt_k=True, input_k=True, subplots=False, evaluate=False)
+    dbscan.run_DBSCAN(fast_compute=False)
 
 
 if __name__ == "__main__":
+    df_x, df_ds1, df_y = load_data()
 
-    df_x, df_ds1 = dm_part1()
+    df_x, df_ds1 = dm_part1( df_x, df_ds1)
 
-    print("Hello World")
+    dm_part2(df_x, df_ds1)
+
+

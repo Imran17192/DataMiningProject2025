@@ -15,7 +15,7 @@ import numpy as np
 import seaborn as sns
 
 from sklearn.cluster import KMeans, DBSCAN
-from sklearn.metrics import silhouette_score
+from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
 
 
 class Clustering:
@@ -24,86 +24,62 @@ class Clustering:
         self.labels_ = []
         self.models_ = []
 
-    def opt_epsilon(self, df, min_samples, random_state):
-        X_2d = PCA(2, random_state=random_state).fit_transform(
-            RobustScaler().fit_transform(df)
+    def DBSCAN_evaluation(self, df, eps, min_samples):
+        model = DBSCAN(eps=eps, min_samples=min_samples)
+        labels = model.fit_predict(df)
+
+        n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
+        print(f"Anzahl Cluster: {n_clusters}")
+        print(f"Anzahl Rauschen (Noise): {list(labels).count(-1)}")
+
+        sil = silhouette_score(df, labels)
+        db = davies_bouldin_score(df, labels)
+        ch = calinski_harabasz_score(df, labels)
+        print(f"Silhouette Score: {sil:.3f}")
+        print(f"Davies-Bouldin Index: {db:.3f}")
+        print(f"Calinski-Harabasz Score: {ch:.3f}")
+
+
+    def plot_k_distance_graph(self, X):
+        k = X.shape[1] * 2
+        neigh = NearestNeighbors(n_neighbors=k)
+        neigh.fit(X)
+        distances, _ = neigh.kneighbors(X)
+        distances = np.sort(distances[:, k - 1])
+
+        kneedle = KneeLocator(
+            range(len(distances)), distances,
+            curve='convex', direction='increasing'
         )
+        best_eps = distances[kneedle.knee] if kneedle.knee is not None else None
 
-        k = min_samples
-        nbrs = NearestNeighbors(n_neighbors=k).fit(X_2d)
-        dist = np.sort(nbrs.kneighbors(X_2d)[0][:, -1])
+        plt.figure(figsize=(10, 6))
+        plt.plot(distances, label='k-distances')
+        if best_eps is not None:
+            plt.axvline(kneedle.knee, color='red', linestyle='--', label=f'Best eps ≈ {best_eps:.3f}')
 
-        knee = KneeLocator(
-            range(len(dist)), dist,
-            curve="convex", direction="increasing"
-        )
-        eps = knee.knee_y if knee.knee_y is not None else np.percentile(dist, 90)
-        return X_2d, eps
-
-    def _plot_density(self, i, X, db, eps):
-        labels = db.labels_
-        plt.figure(figsize=(8, 5))
-        plt.scatter(X[:, 0], X[:, 1], c=labels, cmap='Spectral', s=5)
-        plt.title(f"DBSCAN Result x{i} (eps={eps:.2f})")
-        plt.xlabel("PCA 1")
-        plt.ylabel("PCA 2")
-        plt.grid(True)
+        plt.xlabel('Points')
+        plt.ylabel(f'{k}-th nearest neighbor distance')
+        plt.title('K-distance Graph')
         plt.show()
 
-    def DBSCAN_clustering(self, X, eps, i, min_samples=10, random_state=42):
-        db = DBSCAN(eps=eps, min_samples=min_samples).fit(X)
-        self._plot_density(i, X, db, eps)
+        print("best eps", best_eps)
 
-        labels = db.labels_
+        return best_eps, k
 
-        # Number of clusters in labels, ignoring noise if present.
-        n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
-        n_noise_ = list(labels).count(-1)
-
-        unique_labels = set(labels)
-        core_samples_mask = np.zeros_like(labels, dtype=bool)
-        core_samples_mask[db.core_sample_indices_] = True
-
-        colors = [plt.cm.Spectral(each) for each in np.linspace(0, 1, len(unique_labels))]
-        for k, col in zip(unique_labels, colors):
-            if k == -1:
-                # Black used for noise.
-                col = [0, 0, 0, 1]
-
-            class_member_mask = labels == k
-
-            xy = X[class_member_mask & core_samples_mask]
-            plt.plot(
-                xy[:, 0],
-                xy[:, 1],
-                "o",
-                markerfacecolor=tuple(col),
-                markeredgecolor="k",
-                markersize=14,
-            )
-
-            xy = X[class_member_mask & ~core_samples_mask]
-            plt.plot(
-                xy[:, 0],
-                xy[:, 1],
-                "o",
-                markerfacecolor=tuple(col),
-                markeredgecolor="k",
-                markersize=6,
-            )
-
-        plt.title(f"Estimated number of clusters: {n_clusters_}")
-        plt.show()
-
-    def run_DBSCAN(self):
+    def run_DBSCAN(self, fast_compute=False):
         for i, df in enumerate(self.dfs):
-            X_2d, epsilon = self.opt_epsilon(df, min_samples=10, random_state=42)
+            if fast_compute:
+                epsilon = 1.0
+                min_samples = 5
+            else:
+                epsilon, min_samples = self.plot_k_distance_graph(df)
             print(f"\n=== x{i} ===")
-            self.DBSCAN_clustering(X_2d, epsilon, i, min_samples=10, random_state=42)
+            self.DBSCAN_evaluation(df,epsilon,min_samples)
 
     def optimise_k_means(self, df, max_k=10):
         inertias = []
-        k_range = range(1, max_k + 1)
+        k_range = range(1, 30)
 
         for k in k_range:
             kmeans = KMeans(n_clusters=k, random_state=42)
@@ -117,6 +93,11 @@ class Clustering:
         plt.ylabel('Inertia')
         plt.grid(True)
         plt.show()
+
+        kn = KneeLocator(k_range, inertias, curve='convex', direction='decreasing')
+        best_k = kn.knee
+
+        return best_k
 
     def kmeans_clustering(self, df, k=3):
         kmeans = KMeans(n_clusters=k, random_state=42)
@@ -158,14 +139,54 @@ class Clustering:
         plt.tight_layout()
         plt.show()
 
-    def run_k_means(self, opt_k=True, input_k=True, subplots=True):
+    def kmeans_evaluation(self, df, name):
+        inertia = {0: "Inertia (Elbow Method)"}
+        silhouette = {0: "Silhouette Coefficient"}
+        davies = {0: "Davies-Bouldin Index"}
+        calhar = {0: "Calinski-Harabasz Score"}
+        eval_scores = [inertia, silhouette, davies, calhar]
+
+        k_range = range(2, 100)
+
+        fig, axes = plt.subplots(1, 4, figsize=(20, 4))
+
+        for k in k_range:
+            kmeans = KMeans(n_clusters=k, random_state=42).fit(df)
+            labels = kmeans.labels_
+
+            inertia[k] = kmeans.inertia_
+            silhouette[k] = silhouette_score(df, labels)
+            davies[k] = davies_bouldin_score(df, labels)
+            calhar[k] = calinski_harabasz_score(df, labels)
+
+        for element in eval_scores:
+            print(element)
+
+        for j, score_dict in enumerate(eval_scores):
+            title = score_dict.pop(0)
+            x = list(score_dict.keys())
+            y = list(score_dict.values())
+            axes[j].plot(x, y, marker='o')
+            axes[j].set_title(title)
+            axes[j].set_xlabel("k")
+            axes[j].set_ylabel("Score")
+            score_dict[0] = title
+
+        plt.suptitle(f"KMeans Evaluation: {name}", fontsize=14)
+        plt.tight_layout()
+        plt.show()
+
+
+    def run_k_means(self, opt_k=True, input_k=True, subplots=True, evaluate=True):
         for i, df in enumerate(self.dfs):
             print(f"\n=== x{i} ===")
             if opt_k:
-                self.optimise_k_means(df, 40)
+                k = self.optimise_k_means(df, 30)
             if input_k:
-                k = int(input("k: "))
-                self.kmeans_clustering(df)
+                self.kmeans_clustering(df,k)
             if subplots:
                 self.kmeans_clustering_subplots(df)
+            if evaluate:
+                self.kmeans_evaluation(df, i)
+
 
