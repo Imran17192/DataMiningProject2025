@@ -117,18 +117,19 @@ class ExplorativeDataAnalysis:
                 axes[i].set_ylabel('Value')
             plt.show()
 
-    def compute_eda(self, name, plot = False):
-        df_clean = self.remove_outliers(self.dfs)
-        df_stand = self.standardize_df(df_clean)
+    def compute_eda(self, name, plot = False, clean=False):
+        df = self.dfs
 
-        self.inspect_dataframe(self.dfs, name)
-        self.inspect_dataframe(df_clean, name)
-        self.inspect_dataframe(df_stand, name)
+        if clean:
+            df = self.standardize_df(df)
+
+        self.inspect_dataframe(df, name)
 
         if plot:
-            self.plot_bar(df_stand)
-            self.plot_kernel(df_stand)
-            self.plot_heat(df_stand)
-            self.plot_index_scatter(df_stand)
+            self.plot_bar(df)
+            self.plot_kernel(df)
+            self.plot_heat(df)
+            self.plot_index_scatter(df)
 
-        return df_stand
+        return df
+    #-------------------------------------------------------------------
