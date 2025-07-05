@@ -1,8 +1,13 @@
 import paths
 import pandas as pd
+
 from scripts.preprocess.ExplorativeDataAnalysis import ExplorativeDataAnalysis
 from scripts.preprocess.FeatureEngineering import FeatureEngineering
+from scripts.preprocess.Preprocessing import Preprocessing
+from scripts.train.HierarchicalClustering import HierarchicalClustering
+from scripts.train.kMeans import kMeans
 from scripts.unsupervised_learning.Clustering import Clustering
+from scripts.visualization.Visualization import Visualization
 
 
 def load_data():
@@ -51,8 +56,22 @@ def dm_part1(df_x, df_ds1):
 
 
 def dm_part2(df1, df2):
+    hierarchical_clustering = Clustering(df1)
     kmean = Clustering(df1)
     dbscan = Clustering(df1)
+
+    for linkage_method in ["single", "complete", "average"]:
+        hierarchical_clustering.silhouette_analysis(linkage_method)
+        hierarchical_clustering.linkage_clustering(linkage_method)
+
+    hierarchical_clustering_results = hierarchical_clustering.get_clustering_results()
+    for clustering_method in hierarchical_clustering_results:
+        for dataframe in hierarchical_clustering_results[clustering_method]:
+            Visualization.visualize_clusters(
+                hierarchical_clustering_results[clustering_method][dataframe]["dataframe"],
+                hierarchical_clustering_results[clustering_method][dataframe]["labels"],
+                title=f"Clusteringergebnis {clustering_method}-Linkage ({dataframe}"
+            )
 
     kmean.run_k_means(opt_k=True, input_k=True, subplots=False, evaluate=False)
     dbscan.run_DBSCAN(fast_compute=False)
@@ -64,5 +83,3 @@ if __name__ == "__main__":
     df_x, df_ds1 = dm_part1( df_x, df_ds1)
 
     dm_part2(df_x, df_ds1)
-
-
