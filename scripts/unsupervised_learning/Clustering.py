@@ -14,7 +14,7 @@ from matplotlib import cm
 import numpy as np
 import seaborn as sns
 
-from sklearn.cluster import KMeans, DBSCAN
+from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
 from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
 
 
@@ -23,6 +23,8 @@ class Clustering:
         self.dfs = dfs
         self.labels_ = []
         self.models_ = []
+        self.silhouette_scores_ = {}
+        self.clusters_ = {}
 
     def DBSCAN_evaluation(self, df, eps, min_samples):
         model = DBSCAN(eps=eps, min_samples=min_samples)
@@ -188,5 +190,68 @@ class Clustering:
                 self.kmeans_clustering_subplots(df)
             if evaluate:
                 self.kmeans_evaluation(df, i)
+
+
+    def silhouette_analysis(self, linkage_method, c_max=30):
+        print(f"Silhouettenanalyse für {linkage_method}-Linkage-Verfahren:")
+        self.silhouette_scores_[linkage_method] = {}
+        for i, dataframe_sample in enumerate(self.__sample_dataframes()):
+            print(f"\tx{i}:")
+            best_c = None
+            max_score = -1
+            dataframe_silhouette_scores = []
+            for c in range(2, c_max+1):
+                score = Clustering.__calculate_silhouette_score(dataframe_sample, c, linkage_method)
+                if score > max_score:
+                    max_score = score
+                    best_c = c
+                print(f"\t\tc={c}: {score}")
+                dataframe_silhouette_scores.append((c, score))
+            print(f"\tBester Silhouette-Score und optimales c für x{i} nach dem {linkage_method}-Linkage-Verfahren:")
+            print(f"\t\tSilhouette-Score: {max_score}")
+            print(f"\t\tc:                {best_c}")
+            self.silhouette_scores_[linkage_method][f"x{i}"] = dataframe_silhouette_scores
+
+    def __sample_dataframes(self):
+        dataframes_samples = []
+        for dataframe in self.dfs:
+            if dataframe.shape[0] > 10000:
+                dataframes_samples.append(dataframe.sample(frac=0.1, random_state=42))
+            else:
+                dataframes_samples.append(dataframe)
+        return dataframes_samples
+
+    @staticmethod
+    def __calculate_silhouette_score(dataframe, c, linkage_method):
+        clustering = AgglomerativeClustering(n_clusters=c, linkage=linkage_method)
+        labels = clustering.fit_predict(dataframe)
+        score = silhouette_score(dataframe, labels)
+        return score
+
+    def linkage_clustering(self, linkage_method):
+        self.clusters_[linkage_method] = {}
+        for i, dataframe in enumerate(self.dfs):
+            c = max(self.silhouette_scores_[linkage_method][f"x{i}"], key=lambda x: x[1])[0]
+            model = AgglomerativeClustering(n_clusters=c, linkage=linkage_method)
+            labels = model.fit_predict(dataframe)
+            self.clusters_[linkage_method][f"x{i}"] = {
+                "dataframe": dataframe,
+                "labels": labels
+            }
+
+    def get_clustering_results(self, method=None, dataframe=None):
+        if method:
+            if method in self.clusters_:
+                if dataframe:
+                    if dataframe in self.clusters_[method]:
+                        return self.clusters_[method][dataframe]
+                    else:
+                        print(f"Error: Kein {dataframe}-Clusteringergebnis für Methode {method} verfügbar.")
+                        return None
+                return self.clusters_[method]
+            else:
+                print(f"Error: Kein(e) {dataframe}-Clusteringergebnis(se) verfügbar.")
+                return None
+        return self.clusters_
 
 

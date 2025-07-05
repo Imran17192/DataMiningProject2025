@@ -56,8 +56,22 @@ def dm_part1(df_x, df_ds1):
 
 
 def dm_part2(df1, df2):
+    hierarchical_clustering = Clustering(df1)
     kmean = Clustering(df1)
     dbscan = Clustering(df1)
+
+    for linkage_method in ["single", "complete", "average"]:
+        hierarchical_clustering.silhouette_analysis(linkage_method)
+        hierarchical_clustering.linkage_clustering(linkage_method)
+
+    hierarchical_clustering_results = hierarchical_clustering.get_clustering_results()
+    for clustering_method in hierarchical_clustering_results:
+        for dataframe in hierarchical_clustering_results[clustering_method]:
+            Visualization.visualize_clusters(
+                hierarchical_clustering_results[clustering_method][dataframe]["dataframe"],
+                hierarchical_clustering_results[clustering_method][dataframe]["labels"],
+                title=f"Clusteringergebnis {clustering_method}-Linkage ({dataframe}"
+            )
 
     kmean.run_k_means(opt_k=True, input_k=True, subplots=False, evaluate=False)
     dbscan.run_DBSCAN(fast_compute=False)
@@ -69,66 +83,3 @@ if __name__ == "__main__":
     df_x, df_ds1 = dm_part1( df_x, df_ds1)
 
     dm_part2(df_x, df_ds1)
-
-    # Preprocessing
-
-    dataframes_preprocessed = []
-
-    for dataframe in df_x:
-        dataframes_preprocessed.append(Preprocessing.preprocess(dataframe))
-
-    for i, dataframe_preprocessed in enumerate(dataframes_preprocessed):
-        Visualization.visualize_dataframe(dataframe_preprocessed, title=f"Datensatz x{i} (vorverarbeitet)")
-
-    # Clustering
-
-    ## Hierarchisches Clustering
-
-    hierarchical_clustering = HierarchicalClustering(dataframes_preprocessed)
-
-    linkage_methods = ["single", "average", "complete"]
-
-    clustering_results = {
-        f"x{i}": {
-            "dataframe": dataframe_preprocessed,
-            "hierarchical_clustering": {
-                linkage_method: {} for linkage_method in linkage_methods
-            }
-        } for i, dataframe_preprocessed in enumerate(dataframes_preprocessed)
-    }
-
-    for linkage_method in linkage_methods:
-        dataframes_silhouette_scores = hierarchical_clustering.silhouette_analysis(linkage_method, c_max=30)
-        for i, dataframe_silhouette_scores in enumerate(dataframes_silhouette_scores):
-            Visualization.silhouette_analysis(dataframe_silhouette_scores,
-                                              title=f"Silhouettenkoeffizienten für x{i} ({linkage_method}-Linkage-Verfahren)")
-            c = max(dataframe_silhouette_scores, key=lambda x: x[1])[0]
-            clustering_results[f"x{i}"]["hierarchical_clustering"][linkage_method]["c"] = c
-
-    for x in clustering_results:
-        dataframe = clustering_results[x]["dataframe"]
-        for linkage_method in clustering_results[x]["hierarchical_clustering"]:
-            c = clustering_results[x]["hierarchical_clustering"][linkage_method]["c"]
-            labels = HierarchicalClustering.linkage_clustering(dataframe, linkage_method, c)
-            clustering_results[x]["hierarchical_clustering"][linkage_method]["labels"] = labels
-            Visualization.visualize_clusters(dataframe, labels,
-                                             title=f"Clusteringergebnis für {x} mit c={c} ({linkage_method}-Linkage-Verfahren)")
-
-    ## k-Means
-
-    k_means = kMeans(dataframes_preprocessed)
-
-    dataframes_wcss = k_means.elbow_analysis(k_max=30)
-    for i, dataframe_wcss in enumerate(dataframes_wcss):
-        Visualization.elbow_analysis(dataframe_wcss, title=f"Ellbogendiagramm für x{i} (k-Means)")
-        k = kMeans.locate_knee(dataframe_wcss)
-        clustering_results[f"x{i}"]["kMeans"] = {
-            "k": k
-        }
-
-    for x in clustering_results:
-        dataframe = clustering_results[x]["dataframe"]
-        k = clustering_results[x]["kMeans"]["k"]
-        labels = kMeans.k_means(dataframe, k)
-        clustering_results[x]["kMeans"]["labels"] = labels
-        Visualization.visualize_clusters(dataframe, labels, title=f"Clusteringergebnis für {x} mit k={k} (k-Means)")
