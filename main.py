@@ -62,6 +62,7 @@ def dm_part2(df1, df2):
         kmean.mini_batch_kmeans(df, k=3)
         kmean.hierarchical_clustering(df, n_clusters=3)
 
+
 if __name__ == "__main__":
     df_x, df_ds1, df_y = load_data()
 

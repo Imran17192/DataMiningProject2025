@@ -1,25 +1,33 @@
 import matplotlib
 from kneed import KneeLocator
-from sklearn import metrics
-from sklearn.cluster._hdbscan import hdbscan
 from sklearn.decomposition import PCA
-from sklearn.mixture import GaussianMixture
 from sklearn.neighbors import NearestNeighbors
-from sklearn.preprocessing import RobustScaler
 
 matplotlib.use("TkAgg")
 
 import matplotlib.pyplot as plt
-from matplotlib import cm
 import numpy as np
-import seaborn as sns
 from sklearn.cluster import MiniBatchKMeans, AgglomerativeClustering
 import skfuzzy as fuzz
-
 
 from sklearn.cluster import KMeans, DBSCAN
 from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
 
+
+def plot_3d_pca(df, labels, title):
+    pca = PCA(n_components=3)
+    reduced = pca.fit_transform(df)
+
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot(111, projection='3d')
+    scatter = ax.scatter(reduced[:, 0], reduced[:, 1], reduced[:, 2], c=labels, cmap='tab10', s=20)
+
+    ax.set_title(title)
+    ax.set_xlabel('PCA 1')
+    ax.set_ylabel('PCA 2')
+    ax.set_zlabel('PCA 3')
+    plt.grid(True)
+    plt.show()
 
 class Clustering:
     def __init__(self, dfs):
@@ -41,7 +49,6 @@ class Clustering:
         print(f"Silhouette Score: {sil:.3f}")
         print(f"Davies-Bouldin Index: {db:.3f}")
         print(f"Calinski-Harabasz Score: {ch:.3f}")
-
 
     def plot_k_distance_graph(self, X):
         k = X.shape[1] * 2
@@ -78,7 +85,7 @@ class Clustering:
             else:
                 epsilon, min_samples = self.plot_k_distance_graph(df)
             print(f"\n=== x{i} ===")
-            self.DBSCAN_evaluation(df,epsilon,min_samples)
+            self.DBSCAN_evaluation(df, epsilon, min_samples)
 
     def optimise_k_means(self, df, max_k=10):
         inertias = []
@@ -179,14 +186,13 @@ class Clustering:
         plt.tight_layout()
         plt.show()
 
-
     def run_k_means(self, opt_k=True, input_k=True, subplots=True, evaluate=True):
         for i, df in enumerate(self.dfs):
             print(f"\n=== x{i} ===")
             if opt_k:
                 k = self.optimise_k_means(df, 30)
             if input_k:
-                self.kmeans_clustering(df,k)
+                self.kmeans_clustering(df, k)
             if subplots:
                 self.kmeans_clustering_subplots(df)
             if evaluate:
@@ -214,9 +220,10 @@ class Clustering:
         plt.ylabel('PCA 2')
         plt.grid(True)
         plt.show()
+        plot_3d_pca(df, labels, f'Fuzzy C-Means 3D (c={c})')
 
     def mini_batch_kmeans(self, df, k=3):
-        model = MiniBatchKMeans(n_clusters=k, random_state=42, batch_size=100)
+        model = MiniBatchKMeans(n_clusters=k, batch_size=100)
         labels = model.fit_predict(df)
 
         print(f"MiniBatchKMeans: {k} Cluster")
@@ -233,6 +240,7 @@ class Clustering:
         plt.ylabel('PCA 2')
         plt.grid(True)
         plt.show()
+        plot_3d_pca(df, labels, f'MiniBatchKMeans 3D (k={k})')
 
     def hierarchical_clustering(self, df, n_clusters=3, linkage='ward'):
         model = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage)
@@ -252,3 +260,6 @@ class Clustering:
         plt.ylabel('PCA 2')
         plt.grid(True)
         plt.show()
+        plot_3d_pca(df, labels, f'Hierarchisches Clustering 3D (n={n_clusters})')
+
+
