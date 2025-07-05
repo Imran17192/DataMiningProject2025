@@ -13,6 +13,9 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 import numpy as np
 import seaborn as sns
+from sklearn.cluster import MiniBatchKMeans, AgglomerativeClustering
+import skfuzzy as fuzz
+
 
 from sklearn.cluster import KMeans, DBSCAN
 from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
@@ -189,4 +192,63 @@ class Clustering:
             if evaluate:
                 self.kmeans_evaluation(df, i)
 
+    def fuzzy_c_means(self, df, c=3, m=2.0):
+        data = df.to_numpy().T  # shape: (features, samples)
+        cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(
+            data, c=c, m=m, error=0.005, maxiter=1000, init=None
+        )
 
+        labels = np.argmax(u, axis=0)
+
+        print(f"Fuzzy C-Means: {c} Cluster")
+        sil = silhouette_score(df, labels)
+        print(f"Silhouette Score: {sil:.3f}")
+
+        pca = PCA(n_components=2)
+        reduced = pca.fit_transform(df)
+
+        plt.figure(figsize=(10, 6))
+        plt.scatter(reduced[:, 0], reduced[:, 1], c=labels, cmap='tab10', s=10)
+        plt.title(f'Fuzzy C-Means Clustering (c={c})')
+        plt.xlabel('PCA 1')
+        plt.ylabel('PCA 2')
+        plt.grid(True)
+        plt.show()
+
+    def mini_batch_kmeans(self, df, k=3):
+        model = MiniBatchKMeans(n_clusters=k, random_state=42, batch_size=100)
+        labels = model.fit_predict(df)
+
+        print(f"MiniBatchKMeans: {k} Cluster")
+        sil = silhouette_score(df, labels)
+        print(f"Silhouette Score: {sil:.3f}")
+
+        pca = PCA(n_components=2)
+        reduced = pca.fit_transform(df)
+
+        plt.figure(figsize=(10, 6))
+        plt.scatter(reduced[:, 0], reduced[:, 1], c=labels, cmap='tab10', s=10)
+        plt.title(f'MiniBatchKMeans Clustering (k={k})')
+        plt.xlabel('PCA 1')
+        plt.ylabel('PCA 2')
+        plt.grid(True)
+        plt.show()
+
+    def hierarchical_clustering(self, df, n_clusters=3, linkage='ward'):
+        model = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage)
+        labels = model.fit_predict(df)
+
+        print(f"Hierarchisches Clustering: {n_clusters} Cluster (Linkage: {linkage})")
+        sil = silhouette_score(df, labels)
+        print(f"Silhouette Score: {sil:.3f}")
+
+        pca = PCA(n_components=2)
+        reduced = pca.fit_transform(df)
+
+        plt.figure(figsize=(10, 6))
+        plt.scatter(reduced[:, 0], reduced[:, 1], c=labels, cmap='tab10', s=10)
+        plt.title(f'Agglomerative Clustering (n={n_clusters})')
+        plt.xlabel('PCA 1')
+        plt.ylabel('PCA 2')
+        plt.grid(True)
+        plt.show()
