@@ -61,6 +61,7 @@ def dm_part2(df1, df2):
         kmean.fuzzy_c_means(df, c=3)
         kmean.mini_batch_kmeans(df, k=3)
         kmean.hierarchical_clustering(df, n_clusters=3)
+        kmean.em_gaussian_mixture(df, n_components=3)
 
 
 if __name__ == "__main__":
