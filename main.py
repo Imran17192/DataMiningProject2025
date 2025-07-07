@@ -52,13 +52,30 @@ def dm_part1(df_x, df_ds1):
     feature_engineered_ds1 = FeatureEngineering(eda_da1_df)
     pca_ds1 = feature_engineered_ds1.compute_features(show_plots=False)
 
-    return eda_x_df, eda_da1_df
+    return pca_x, pca_ds1
 
 
-def dm_part2(df1, df2):
-    hierarchical_clustering = Clustering(df1)
-    kmean = Clustering(df1)
-    dbscan = Clustering(df1)
+def dm_part2(x2d, x3d):
+    hierarchical_clustering = Clustering(x2d)
+    fuzzy = Clustering(x2d)
+    kmean = Clustering(x2d)
+    dbscan = Clustering(x2d)
+
+    kmean.run_k_means(opt_k=False, input_k=False, subplots=False, evaluate=False)
+    dbscan.run_DBSCAN(fast_compute=False)
+
+    for i, df in enumerate(x3d):
+        raw = input("Anzahl der Cluster  ".format(i))
+        try:
+            k = int(raw)
+        except ValueError:
+            print("keine zahl")
+            continue
+
+        print(f"\n===  df{i} mit k={k} ===")
+        fuzzy.fuzzy_c_means(df, c=k)
+        fuzzy.mini_batch_kmeans(df, k=k)
+        fuzzy.em_gaussian_mixture(df, n_components=k)
 
     for linkage_method in ["single", "complete", "average"]:
         hierarchical_clustering.silhouette_analysis(linkage_method)
@@ -73,19 +90,14 @@ def dm_part2(df1, df2):
                 title=f"Clusteringergebnis {clustering_method}-Linkage ({dataframe}"
             )
 
-    kmean.run_k_means(opt_k=True, input_k=True, subplots=False, evaluate=False)
-    kmean.run_k_means(opt_k=False, input_k=False, subplots=False, evaluate=False)
-    dbscan.run_DBSCAN(fast_compute=False)
-    for i, df in enumerate(df1):
-        print(f"\n=== Erweiterte Clusterverfahren für df{i} ===")
-        kmean.fuzzy_c_means(df, c=3)
-        kmean.mini_batch_kmeans(df, k=3)
-        kmean.em_gaussian_mixture(df, n_components=3)
+
+
 
 
 if __name__ == "__main__":
     df_x, df_ds1, df_y = load_data()
 
-    df_x, df_ds1 = dm_part1( df_x, df_ds1)
+    df_x_2d = [Preprocessing.preprocess(dataframe) for dataframe in df_x]
+    df_x_3d = [Preprocessing.preprocess(dataframe, main_components=3) for dataframe in df_x]
 
-    dm_part2(df_x, df_ds1)
+    dm_part2(df_x_2d, df_x_3d)

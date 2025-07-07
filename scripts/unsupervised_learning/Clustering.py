@@ -21,7 +21,8 @@ def plot_3d_pca(df, labels, title):
 
     fig = plt.figure(figsize=(10, 7))
     ax = fig.add_subplot(111, projection='3d')
-    scatter = ax.scatter(reduced[:, 0], reduced[:, 1], reduced[:, 2], c=labels, cmap='tab10', s=20)
+    cmap = plt.cm.get_cmap('tab20', 25)
+    scatter = ax.scatter(reduced[:, 0], reduced[:, 1], reduced[:, 2], c=labels, cmap=cmap, s=25)
 
     ax.set_title(title)
     ax.set_xlabel('PCA 1')
@@ -38,7 +39,7 @@ class Clustering:
         self.silhouette_scores_ = {}
         self.clusters_ = {}
 
-    def DBSCAN_evaluation(self, df, eps, min_samples):
+    def DBSCAN_evaluation(self, df,i, eps, min_samples):
         model = DBSCAN(eps=eps, min_samples=min_samples)
         labels = model.fit_predict(df)
 
@@ -52,6 +53,18 @@ class Clustering:
         print(f"Silhouette Score: {sil:.3f}")
         print(f"Davies-Bouldin Index: {db:.3f}")
         print(f"Calinski-Harabasz Score: {ch:.3f}")
+
+        pca = PCA(n_components=2)
+        reduced = pca.fit_transform(df)
+
+        plt.figure(figsize=(8, 6))
+        cmap = plt.cm.get_cmap('tab20', 25)
+        plt.scatter(reduced[:, 0], reduced[:, 1], c=labels, cmap=cmap, s=25)
+        plt.title(f'DBSCAN Clustering (eps={eps:.2f}, min_samples={min_samples})f"\nx{i} "')
+        plt.xlabel('PCA 1')
+        plt.ylabel('PCA 2')
+        plt.grid(True)
+        plt.show()
 
     def plot_k_distance_graph(self, X):
         k = X.shape[1] * 2
@@ -88,9 +101,9 @@ class Clustering:
             else:
                 epsilon, min_samples = self.plot_k_distance_graph(df)
             print(f"\n=== x{i} ===")
-            self.DBSCAN_evaluation(df, epsilon, min_samples)
+            self.DBSCAN_evaluation(df, i,epsilon, min_samples)
 
-    def optimise_k_means(self, df, max_k=10):
+    def optimise_k_means(self, df,i, max_k=10):
         inertias = []
         k_range = range(1, 30)
 
@@ -101,7 +114,7 @@ class Clustering:
 
         plt.figure(figsize=(10, 5))
         plt.plot(k_range, inertias, marker='o')
-        plt.title('Elbow Curve')
+        plt.title('Elbow Curve' f"\nx{i} ")
         plt.xlabel('Anzahl der Cluster (k)')
         plt.ylabel('Inertia')
         plt.grid(True)
@@ -112,7 +125,7 @@ class Clustering:
 
         return best_k
 
-    def kmeans_clustering(self, df, k=3):
+    def kmeans_clustering(self, df, i,k=3):
         kmeans = KMeans(n_clusters=k, random_state=42)
         labels = kmeans.fit_predict(df)
 
@@ -126,26 +139,28 @@ class Clustering:
         reduced = pca.fit_transform(df)
 
         plt.figure(figsize=(20, 30))
-        plt.scatter(reduced[:, 0], reduced[:, 1], c=labels, cmap='tab10', s=10)
-        plt.title(f'KMeans Clustering (k={k})')
+        cmap = plt.cm.get_cmap('tab20', 25)
+        plt.scatter(reduced[:, 0], reduced[:, 1], c=labels, cmap=cmap, s=25)
+        plt.title(f'KMeans Clustering (k={k}) f"\nx{i} "')
         plt.xlabel('PCA 1')
         plt.ylabel('PCA 2')
         plt.grid(True)
         plt.show()
 
-    def kmeans_clustering_subplots(self, df):
+    def kmeans_clustering_subplots(self, df,i):
         fig, axes = plt.subplots(3, 3, figsize=(18, 15))
         axes = np.array(axes).flatten()
 
-        for i, k in enumerate(range(2, 11)):
+        for i, k in enumerate(range(11, 20)):
             kmeans = KMeans(n_clusters=k, random_state=42)
             labels = kmeans.fit_predict(df)
 
             pca = PCA(n_components=2)
             reduced = pca.fit_transform(df)
 
-            axes[i].scatter(reduced[:, 0], reduced[:, 1], c=labels, cmap='tab10', s=10)
-            axes[i].set_title(f'KMeans Clustering (k={k})')
+            cmap = plt.cm.get_cmap('tab20', 25)
+            axes[i].scatter(reduced[:, 0], reduced[:, 1], c=labels, cmap=cmap, s=25)
+            axes[i].set_title(f'KMeans Clustering (k={k}) f"\nx{i} "')
             axes[i].set_xlabel('PCA 1')
             axes[i].set_ylabel('PCA 2')
 
@@ -192,12 +207,13 @@ class Clustering:
     def run_k_means(self, opt_k=True, input_k=True, subplots=True, evaluate=True):
         for i, df in enumerate(self.dfs):
             print(f"\n=== x{i} ===")
+            print(f"\nx{i} ")
             if opt_k:
-                k = self.optimise_k_means(df, 30)
+                k = self.optimise_k_means(df, i,30)
             if input_k:
-                self.kmeans_clustering(df, k)
+                self.kmeans_clustering(df, i,k)
             if subplots:
-                self.kmeans_clustering_subplots(df)
+                self.kmeans_clustering_subplots(df,i)
             if evaluate:
                 self.kmeans_evaluation(df, i)
 
@@ -217,7 +233,8 @@ class Clustering:
         reduced = pca.fit_transform(df)
 
         plt.figure(figsize=(10, 6))
-        plt.scatter(reduced[:, 0], reduced[:, 1], c=labels, cmap='tab10', s=10)
+        cmap = plt.cm.get_cmap('tab20', 25)
+        plt.scatter(reduced[:, 0], reduced[:, 1], c=labels, cmap=cmap, s=25)
         plt.title(f'Fuzzy C-Means Clustering (c={c})')
         plt.xlabel('PCA 1')
         plt.ylabel('PCA 2')
@@ -237,7 +254,8 @@ class Clustering:
         reduced = pca.fit_transform(df)
 
         plt.figure(figsize=(10, 6))
-        plt.scatter(reduced[:, 0], reduced[:, 1], c=labels, cmap='tab10', s=10)
+        cmap = plt.cm.get_cmap('tab20', 25)
+        plt.scatter(reduced[:, 0], reduced[:, 1], c=labels, cmap=cmap, s=25)
         plt.title(f'MiniBatchKMeans Clustering (k={k})')
         plt.xlabel('PCA 1')
         plt.ylabel('PCA 2')
@@ -258,7 +276,8 @@ class Clustering:
         pca = PCA(n_components=2)
         reduced = pca.fit_transform(df)
         plt.figure(figsize=(10, 6))
-        plt.scatter(reduced[:, 0], reduced[:, 1], c=labels, cmap='tab10', s=10)
+        cmap = plt.cm.get_cmap('tab20', 25)
+        plt.scatter(reduced[:, 0], reduced[:, 1], c=labels, cmap=cmap, s=25)
         plt.title(f'EM Clustering (GMM, n={n_components}) – 2D')
         plt.xlabel('PCA 1')
         plt.ylabel('PCA 2')

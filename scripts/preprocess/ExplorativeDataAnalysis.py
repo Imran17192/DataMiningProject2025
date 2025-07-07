@@ -122,6 +122,7 @@ class ExplorativeDataAnalysis:
 
         if clean:
             df = self.standardize_df(df)
+            df = self.remove_outliers(df)
 
         self.inspect_dataframe(df, name)
 
