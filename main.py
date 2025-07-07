@@ -54,13 +54,12 @@ def dm_part2(df1, df2):
     kmean = Clustering(df1)
     dbscan = Clustering(df1)
 
-    kmean.run_k_means(opt_k=True, input_k=True, subplots=False, evaluate=False)
+    kmean.run_k_means(opt_k=False, input_k=False, subplots=False, evaluate=False)
     dbscan.run_DBSCAN(fast_compute=False)
     for i, df in enumerate(df1):
         print(f"\n=== Erweiterte Clusterverfahren für df{i} ===")
         kmean.fuzzy_c_means(df, c=3)
         kmean.mini_batch_kmeans(df, k=3)
-        kmean.hierarchical_clustering(df, n_clusters=3)
         kmean.em_gaussian_mixture(df, n_components=3)
 
 
