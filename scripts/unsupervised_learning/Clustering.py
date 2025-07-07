@@ -243,26 +243,6 @@ class Clustering:
         plt.show()
         plot_3d_pca(df, labels, f'MiniBatchKMeans 3D (k={k})')
 
-    def hierarchical_clustering(self, df, n_clusters=3, linkage='ward'):
-        model = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage)
-        labels = model.fit_predict(df)
-
-        print(f"Hierarchisches Clustering: {n_clusters} Cluster (Linkage: {linkage})")
-        sil = silhouette_score(df, labels)
-        print(f"Silhouette Score: {sil:.3f}")
-
-        pca = PCA(n_components=2)
-        reduced = pca.fit_transform(df)
-
-        plt.figure(figsize=(10, 6))
-        plt.scatter(reduced[:, 0], reduced[:, 1], c=labels, cmap='tab10', s=10)
-        plt.title(f'Agglomerative Clustering (n={n_clusters})')
-        plt.xlabel('PCA 1')
-        plt.ylabel('PCA 2')
-        plt.grid(True)
-        plt.show()
-        plot_3d_pca(df, labels, f'Hierarchisches Clustering 3D (n={n_clusters})')
-
     def em_gaussian_mixture(self, df, n_components=3):
         model = GaussianMixture(n_components=n_components, covariance_type='full', random_state=42)
         model.fit(df)
