@@ -25,6 +25,33 @@ class Preprocessing:
         return dataframe_cleaned
 
     @staticmethod
+    def remove_outliers_labeled(dataframe, labels_column="y"):
+        # Berechne IQR (Interquartilsabstand)
+        Q1 = dataframe.quantile(1 / 4)
+        Q3 = dataframe.quantile(3 / 4)
+        IQR = Q3 - Q1
+
+        # Entferne Ausreißer, die außerhalb des Bereichs [Q1 - 1.5*IQR, Q3 + 1.5*IQR] liegen
+        dataframe_cleaned = dataframe[~((dataframe.drop(columns=[labels_column]) < (Q1 - 1.5 * IQR)) | (dataframe.drop(columns=[labels_column]) > (Q3 + 1.5 * IQR))).any(axis=1)]
+
+        return dataframe_cleaned
+
+    @staticmethod
+    def remove_outliers_labels(dataframe, labels_column="y"):
+        # Berechne IQR (Interquartilsabstand)
+        Q1 = dataframe.drop(columns=[labels_column]).quantile(1/4)
+        Q3 = dataframe.drop(columns=[labels_column]).quantile(3/4)
+        IQR = Q3 - Q1
+
+        # Definiere Bedingung
+        condition = (dataframe.drop(columns=[labels_column]) < (Q1 - 1.5 * IQR)) | (dataframe.drop(columns=[labels_column]) > (Q3 + 1.5 * IQR))
+
+        # Zeilen anhand der Bedingung filtern
+        dataframe_cleaned = dataframe[~condition.any(axis=1)]
+
+        return dataframe_cleaned
+
+    @staticmethod
     def standardize(dataframe):
         # Standardisierung der Daten
         scaler = StandardScaler()

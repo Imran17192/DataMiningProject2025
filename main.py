@@ -1,3 +1,7 @@
+import json
+
+from sklearn.model_selection import train_test_split
+
 import paths
 import pandas as pd
 
@@ -20,15 +24,6 @@ def load_data():
     df_x.append(df_x1)
     df_x.append(df_x2)
 
-    df_y = []
-    df_y0 = pd.read_json(paths.Y0_DIR)
-    df_y1 = pd.read_json(paths.Y1_DIR)
-    df_y2 = pd.read_json(paths.Y2_DIR)
-
-    df_y.append(df_y0)
-    df_y.append(df_y1)
-    df_y.append(df_y2)
-
     df_ds1 = []
     for p in paths.DS1_DIR:
         df = pd.read_json(p)
@@ -36,7 +31,16 @@ def load_data():
 
     # DS2 not a pandas datframe so do it later. it is also just  for puzzle
 
-    return df_x, df_ds1, df_y
+    return df_x, df_ds1
+
+
+def load_labels():
+    labels = []
+    for labels_path in [paths.Y0_DIR, paths.Y1_DIR, paths.Y2_DIR]:
+        with open(labels_path) as labels_file:
+            y = json.load(labels_file)
+            labels.append(y)
+    return labels
 
 
 def dm_part1(df_x, df_ds1):
@@ -83,9 +87,43 @@ def dm_part2(df1, df2):
         kmean.em_gaussian_mixture(df, n_components=3)
 
 
+def dm_part3(df_x, labels):
+    # Verschmelzen
+    dataframes_labeled = [dataframe.copy() for dataframe in df_x]
+    for x, y in zip(dataframes_labeled, labels):
+        x['y'] = y
+
+    # Vorverarbeiten
+    dataframes_labeled_preprocessed=[]
+    for dataframe in dataframes_labeled:
+        dataframe_cleaned = Preprocessing.remove_outliers_labels(dataframe, labels_column='y')
+        x = dataframe_cleaned.drop(columns=['y'])
+        y = dataframe_cleaned['y']
+        dataframe_standardized = Preprocessing.standardize(x)
+        dataframe_preprocessed = Preprocessing.principal_component_analysis(dataframe_standardized, main_components=3)
+        dataframe_preprocessed['y'] = y.values
+        dataframes_labeled_preprocessed.append(dataframe_preprocessed)
+
+    # Split 70-30
+    dataframes_train = []
+    dataframes_test = []
+    for dataframe in dataframes_labeled_preprocessed:
+        x = dataframe.drop(columns=['y'])
+        y = dataframe['y']
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42)
+        dataframe_train = pd.concat([x_train, y_train], axis=1)
+        dataframe_test = pd.concat([x_test, y_test], axis=1)
+        dataframes_train.append(dataframe_train)
+        dataframes_test.append(dataframe_test)
+
+
 if __name__ == "__main__":
-    df_x, df_ds1, df_y = load_data()
+    df_x, df_ds1 = load_data()
 
-    df_x, df_ds1 = dm_part1( df_x, df_ds1)
+    #df_x_preprocessed, df_ds1_preprocessed = dm_part1(df_x, df_ds1)
 
-    dm_part2(df_x, df_ds1)
+    #dm_part2(df_x_preprocessed, df_ds1_preprocessed)
+
+    labels_y = load_labels()
+
+    dm_part3(df_x, labels_y)
