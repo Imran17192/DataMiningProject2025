@@ -37,3 +37,6 @@ Y0_DIR = Y_DIR.joinpath('y0.json')
 Y1_DIR = Y_DIR.joinpath('y1.json')
 Y2_DIR = Y_DIR.joinpath('y2.json')
 
+#
+X_TEST_DIR = DATA_DIR.joinpath('test')
+X_TEST = X_TEST_DIR.joinpath('x.json')

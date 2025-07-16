@@ -3,6 +3,12 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import math
 import seaborn as sns
+from sklearn import preprocessing
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import KBinsDiscretizer
+import pandas as pd
+import numpy as np
 
 class ExplorativeDataAnalysis:
     def __init__(self, dfs):
@@ -117,19 +123,94 @@ class ExplorativeDataAnalysis:
                 axes[i].set_ylabel('Value')
             plt.show()
 
-    def compute_eda(self, name, plot = False, clean=False):
+    def pca_reduction(self, threshold = 0.95, dim_redu_count=1,show_plots: bool = True  ):
+        dfs_pca = []
+        for df in self.dfs:
+            scaled_data = preprocessing.scale(df.T)
+            pca = PCA()
+            pca.fit(scaled_data)
+
+            cum_var = np.cumsum(pca.explained_variance_ratio_)
+            n_components = np.searchsorted(cum_var, threshold) + 1
+
+            orig_dim = df.shape[1]
+            use_pca = (orig_dim - n_components) >= dim_redu_count
+            if use_pca:
+                if show_plots:
+                    components = np.arange(1, len(cum_var) + 1)
+                    plt.figure(figsize=(10, 4))
+                    plt.plot(components, cum_var,
+                             marker='o', linestyle='--')
+                    plt.axhline(y=threshold, color='r', linestyle='-')
+                    plt.text(0.5, threshold - 0.05,
+                             f'{int(threshold * 100)} %-Threshold',
+                             color='red')
+                    plt.xlabel('Number of components')
+                    plt.ylabel('accumulated variance')
+                    plt.title('accumulative explained variance')
+                    plt.tight_layout()
+                    plt.show()
+                per_var = np.round(pca.explained_variance_ratio_ * 100, 1)
+                labels = [f'PC{i}' for i in range(1, len(per_var) + 1)]
+
+                if show_plots:
+                    plt.bar(x=labels, height=per_var)
+                    plt.ylabel('Variance in %')
+                    plt.xlabel('PC')
+                    plt.title('Scree-Plot')
+                    plt.tight_layout()
+                    plt.show()
+
+                pca_data = pca.transform(scaled_data)
+                pca_df = pd.DataFrame(
+                    pca_data,
+                    index=df.columns,
+                    columns=labels
+                )
+
+                if show_plots:
+                    plt.scatter(pca_df["PC1"], pca_df["PC2"])
+                    plt.title('PCA-Scatter')
+                    plt.xlabel(f"PC1 – {per_var[0]} %")
+                    plt.ylabel(f"PC2 – {per_var[1]} %")
+                    for sample in pca_df.index:
+                        plt.annotate(sample,
+                                     (pca_df.loc[sample, "PC1"],
+                                      pca_df.loc[sample, "PC2"]))
+                    plt.tight_layout()
+                    plt.show()
+
+                reduced = pca_df.iloc[:, :n_components]
+                dfs_pca.append(reduced.T)
+
+            else:
+                dfs_pca.append(df)
+
+        return dfs_pca
+
+
+    def compute_eda(self, name, plot = False, clean=False, classify = False):
         df = self.dfs
 
-        if clean:
-            df = self.standardize_df(df)
+        if classify:
+            self.cut_inner_ring(df)
+            self.remove_outliers(df)
+            self.standardize_df(df)
+            self.pca_reduction(df)
+            self.split_data(df)
 
-        self.inspect_dataframe(df, name)
+        else:
 
-        if plot:
-            self.plot_bar(df)
-            self.plot_kernel(df)
-            self.plot_heat(df)
-            self.plot_index_scatter(df)
+            if clean:
+                df = self.standardize_df(df)
 
-        return df
-    #-------------------------------------------------------------------
+            self.inspect_dataframe(df, name)
+
+            if plot:
+                self.plot_bar(df)
+                self.plot_kernel(df)
+                self.plot_heat(df)
+                self.plot_index_scatter(df)
+
+            return df
+        #-------------------------------------------------------------------

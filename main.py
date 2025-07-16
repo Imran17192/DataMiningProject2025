@@ -13,6 +13,12 @@ from scripts.train.kMeans import kMeans
 from scripts.unsupervised_learning.Clustering import Clustering
 from scripts.visualization.Visualization import Visualization
 
+from scripts.preprocess.Preprocessing_Classify import Preprocessing_Classify
+from scripts.classification.Classifiy import Classify
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
+
 
 def load_data():
     df_x = []
@@ -41,6 +47,9 @@ def load_labels():
             y = json.load(labels_file)
             labels.append(y)
     return labels
+
+def load_test():
+    return pd.read_json(paths.X_TEST)
 
 
 def dm_part1(df_x, df_ds1):
@@ -87,34 +96,62 @@ def dm_part2(df1, df2):
         kmean.em_gaussian_mixture(df, n_components=3)
 
 
-def dm_part3(df_x, labels):
-    # Verschmelzen
-    dataframes_labeled = [dataframe.copy() for dataframe in df_x]
-    for x, y in zip(dataframes_labeled, labels):
-        x['y'] = y
+def dm_part3(df_x, labels, x_test):
+    prepare = Preprocessing_Classify(df_x, labels, x_test)
+    X_train_list, X_valid_list, y_train_list, y_valid_list, x_test_processed = prepare.compute_eda()
 
-    # Vorverarbeiten
-    dataframes_labeled_preprocessed=[]
-    for dataframe in dataframes_labeled:
-        dataframe_cleaned = Preprocessing.remove_outliers_labels(dataframe, labels_column='y')
-        x = dataframe_cleaned.drop(columns=['y'])
-        y = dataframe_cleaned['y']
-        dataframe_standardized = Preprocessing.standardize(x)
-        dataframe_preprocessed = Preprocessing.principal_component_analysis(dataframe_standardized, main_components=3)
-        dataframe_preprocessed['y'] = y.values
-        dataframes_labeled_preprocessed.append(dataframe_preprocessed)
+    print("\n=== Datenformen ===")
+    for i in range(len(X_train_list)):
+        print(f"\n--- Datensatz {i} ---")
+        print(f"X_train: {X_train_list[i].shape}")
+        print(f"X_valid: {X_valid_list[i].shape}")
+        print(f"y_train: {y_train_list[i].shape}")
+        print(f"y_valid: {y_valid_list[i].shape}")
+    print(f"\nPreprocessed x_test: {x_test_processed.shape}")
 
-    # Split 70-30
-    dataframes_train = []
-    dataframes_test = []
-    for dataframe in dataframes_labeled_preprocessed:
-        x = dataframe.drop(columns=['y'])
-        y = dataframe['y']
-        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42)
-        dataframe_train = pd.concat([x_train, y_train], axis=1)
-        dataframe_test = pd.concat([x_test, y_test], axis=1)
-        dataframes_train.append(dataframe_train)
-        dataframes_test.append(dataframe_test)
+    # ========== ALLE MODELLE TRAINIEREN ========== #
+    model_types = ["svm", "tree", "gnb", "mlp", "rf", "knn", "logreg"]
+    models = {}
+    predictions_test = {}
+
+    for model_type in model_types:
+        print(f"\n=== {model_type.upper()} ===")
+        model = Classify(
+            X_train_list[0], y_train_list[0],
+            X_valid_list[0], y_valid_list[0],
+            model_type=model_type
+        )
+        y_pred = model.predict(x_test_processed)
+        model.save_predictions(y_pred, path=f"{model_type}_prediction.json")
+        models[model_type] = model
+        predictions_test[model_type] = y_pred
+
+    # ========== VISUALISIERUNG: CONFUSION-MATRICES ========== #
+    for model_type in model_types:
+        model = models[model_type]
+        y_valid = y_valid_list[0]
+        y_pred_valid = model.model.predict(X_valid_list[0])
+        cm = confusion_matrix(y_valid, y_pred_valid)
+
+        plt.figure(figsize=(10, 8))
+        sns.heatmap(cm, annot=False, cmap="Blues")
+        plt.title(f"Confusion Matrix – {model_type.upper()} (Validierungsdaten)")
+        plt.xlabel("Vorhergesagt")
+        plt.ylabel("Tatsächlich")
+        plt.tight_layout()
+        plt.show()
+
+    accuracies = [models[m].last_accuracy for m in model_types]
+    plt.bar(model_types, accuracies)
+    plt.title("Accuracy Vergleich")
+    plt.ylabel("Accuracy")
+    plt.xlabel("Modelltyp")
+    plt.ylim(0, 1)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
+
+    return models, predictions_test
 
 
 if __name__ == "__main__":
@@ -124,6 +161,8 @@ if __name__ == "__main__":
 
     #dm_part2(df_x_preprocessed, df_ds1_preprocessed)
 
-    labels_y = load_labels()
 
-    dm_part3(df_x, labels_y)
+    labels_y = load_labels()
+    x_test = load_test()
+
+    dm_part3(df_x, labels_y, x_test)
