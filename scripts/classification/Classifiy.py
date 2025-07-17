@@ -66,6 +66,8 @@ class Classify:
             self.plot_svm_decision_boundary()
 
         self.y_test_pred = self.model.predict(self.X_train)
+        self.visualize_prediction_embedding(self.X_train, self.y_train, self.y_test_pred, title="SVM Test-Prediction")
+        self.visualize_prediction_embedding_3d(self.X_train, self.y_train, self.y_test_pred, title="SVM Test-Prediction 3D")
         self.save_predictions(self.y_test_pred, path="predictions/svm_prediction.json")
 
     def train_logreg(self):
@@ -85,6 +87,8 @@ class Classify:
             self.visualize_prediction_embedding_3d(self.X_valid, self.y_valid, y_pred, title="LogReg Prediction 3d")
 
         self.y_test_pred = self.model.predict(self.X_train)
+        self.visualize_prediction_embedding(self.X_train, self.y_train, self.y_test_pred, title="LogReg Test-Prediction")
+        self.visualize_prediction_embedding_3d(self.X_train, self.y_train, self.y_test_pred, title="LogReg Test-Prediction 3D")
         self.save_predictions(self.y_test_pred, path="predictions/logreg_prediction.json")
 
     def train_gnb(self):
@@ -103,6 +107,8 @@ class Classify:
             self.visualize_prediction_embedding_3d(self.X_valid, self.y_valid, y_pred, title="GNB Prediction 3d")
 
         self.y_test_pred = self.model.predict(self.X_train)
+        self.visualize_prediction_embedding(self.X_train, self.y_train, self.y_test_pred, title="GNB Test-Prediction")
+        self.visualize_prediction_embedding_3d(self.X_train, self.y_train, self.y_test_pred, title="GNB Test-Prediction 3D")
         self.save_predictions(self.y_test_pred, path="predictions/gnb_prediction.json")
 
     def train_knn(self):
@@ -123,6 +129,8 @@ class Classify:
             self.plot_knn_decision_boundary()
 
         self.y_test_pred = self.model.predict(self.X_train)
+        self.visualize_prediction_embedding(self.X_train, self.y_train, self.y_test_pred, title="KNN Test-Prediction")
+        self.visualize_prediction_embedding_3d(self.X_train, self.y_train, self.y_test_pred, title="KNN Test-Prediction 3D")
         self.save_predictions(self.y_test_pred, path="predictions/knn_prediction.json")
 
 
