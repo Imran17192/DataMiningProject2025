@@ -32,6 +32,8 @@ class Classify:
         self.X_valid = X_valid
         self.y_valid = y_valid
 
+        self.y_test_pred = None
+
         self.model_type = model_type
         self.model = None
 
@@ -63,8 +65,8 @@ class Classify:
             self.visualize_prediction_embedding_3d(self.X_valid, self.y_valid, y_pred, title= "SVM Prediction 3d")
             self.plot_svm_decision_boundary()
 
-        y_test_pred = self.model.predict(self.X_train)
-        self.save_predictions(y_test_pred, path="predictions/svm_prediction.json")
+        self.y_test_pred = self.model.predict(self.X_train)
+        self.save_predictions(self.y_test_pred, path="predictions/svm_prediction.json")
 
     def train_logreg(self):
         if not isinstance(self.model, LogisticRegression):
@@ -82,8 +84,8 @@ class Classify:
             self.visualize_prediction_embedding(self.X_valid, self.y_valid, y_pred, title="LogReg Prediction")
             self.visualize_prediction_embedding_3d(self.X_valid, self.y_valid, y_pred, title="LogReg Prediction 3d")
 
-        y_test_pred = self.model.predict(self.X_train)
-        self.save_predictions(y_test_pred, path="predictions/logreg_prediction.json")
+        self.y_test_pred = self.model.predict(self.X_train)
+        self.save_predictions(self.y_test_pred, path="predictions/logreg_prediction.json")
 
     def train_gnb(self):
         if not isinstance(self.model, GaussianNB):
@@ -100,8 +102,8 @@ class Classify:
             self.visualize_prediction_embedding(self.X_valid, self.y_valid, y_pred, title="GNB Prediction")
             self.visualize_prediction_embedding_3d(self.X_valid, self.y_valid, y_pred, title="GNB Prediction 3d")
 
-        y_test_pred = self.model.predict(self.X_train)
-        self.save_predictions(y_test_pred, path="predictions/gnb_prediction.json")
+        self.y_test_pred = self.model.predict(self.X_train)
+        self.save_predictions(self.y_test_pred, path="predictions/gnb_prediction.json")
 
     def train_knn(self):
         if not isinstance(self.model, KNeighborsClassifier):
@@ -120,14 +122,15 @@ class Classify:
             self.visualize_prediction_embedding_3d(self.X_valid, self.y_valid, y_pred, title="KNN Prediction 3d")
             self.plot_knn_decision_boundary()
 
-        y_test_pred = self.model.predict(self.X_train)
-        self.save_predictions(y_test_pred, path="predictions/knn_prediction.json")
+        self.y_test_pred = self.model.predict(self.X_train)
+        self.save_predictions(self.y_test_pred, path="predictions/knn_prediction.json")
 
 
     def predict(self, X):
         return self.model.predict(X)
 
-    def save_predictions(self, y_pred, path="predictions.json"):
+    @staticmethod
+    def save_predictions(y_pred, path="predictions.json"):
         with open(path, "w") as f:
             json.dump(y_pred.tolist(), f)
 
@@ -141,7 +144,8 @@ class Classify:
         plt.tight_layout()
         plt.show()
 
-    def visualize_prediction_embedding(self, X, y_true, y_pred, method="tsne", title="_"):
+    @staticmethod
+    def visualize_prediction_embedding(X, y_true, y_pred, method="tsne", title="_"):
         embed = TSNE(n_components=2, random_state=42).fit_transform(X)
         plt.figure(figsize=(10, 5))
         plt.subplot(1, 2, 1)
@@ -154,7 +158,8 @@ class Classify:
         plt.tight_layout()
         plt.show()
 
-    def visualize_prediction_embedding_3d(self, X, y_true, y_pred, method="pca", title="_"):
+    @staticmethod
+    def visualize_prediction_embedding_3d(X, y_true, y_pred, method="pca", title="_"):
         if method == "pca":
             pca = PCA(n_components=3)
             embed = pca.fit_transform(X)

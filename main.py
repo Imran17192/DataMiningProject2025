@@ -108,22 +108,31 @@ def dm_part3(df_x, labels, x_test):
     prepare = Preprocessing_Classify(df_x, labels, x_test)
     X_train_list, X_valid_list, y_train_list, y_valid_list, x_test_processed = prepare.compute_eda()
 
+    y_test_preds = []
+
     svm = Classify(X_train_list[0], y_train_list[0], X_valid_list[0], y_valid_list[0], model_type="svm")
     svm.train_svm()
+    y_test_preds.append(svm.y_test_pred)
 
     lr = Classify(X_train_list[0], y_train_list[0], X_valid_list[0], y_valid_list[0], model_type="logreg")
     lr.train_logreg()
+    y_test_preds.append(lr.y_test_pred)
 
     gnb = Classify(X_train_list[0], y_train_list[0], X_valid_list[0], y_valid_list[0], model_type="gnb")
     gnb.train_gnb()
+    y_test_preds.append(gnb.y_test_pred)
 
     knn = Classify(X_train_list[0], y_train_list[0], X_valid_list[0], y_valid_list[0], model_type="knn")
     knn.train_knn()
+    y_test_preds.append(knn.y_test_pred)
 
-    # TODO take hard average of all prediciton for final prediciotn json perhaps visualize predictions
+    np_y_test_preds = np.array(y_test_preds)
 
+    most_frequent_y_preds = mode(np_y_test_preds, axis=0, keepdims=False).mode
+    Classify.save_predictions(most_frequent_y_preds, path = "predictions/average_prediction.json")
 
-    return
+    Classify.visualize_prediction_embedding(X_train_list[0], y_train_list[0], most_frequent_y_preds, title="Average Test-Prediction")
+    Classify.visualize_prediction_embedding_3d(X_train_list[0], y_train_list[0], most_frequent_y_preds, title="Average Test-Prediction 3D")
 
 
 if __name__ == "__main__":
