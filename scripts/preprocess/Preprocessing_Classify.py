@@ -1,19 +1,16 @@
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
-import math
 import seaborn as sns
 from sklearn import preprocessing
 from sklearn.decomposition import PCA
-import matplotlib.pyplot as plt
-from sklearn.preprocessing import KBinsDiscretizer
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 
 
-class Preprocessing_Classify():
-    def __init__(self, dfs, y ,x_test):
+class Preprocessing_Classify:
+    def __init__(self, dfs, y, x_test):
         self.dfs = dfs
         self.y = y
         self.x_test = x_test
@@ -23,16 +20,6 @@ class Preprocessing_Classify():
 
     def normalize_df(self, df):
         return (df - df.min()) / (df.max() - df.min())
-
-    def cut_inner_ring(self, df, index):
-        if index == 0:
-            return df.iloc[:, 7:16]
-        elif index == 1:
-            return df
-        elif index == 2:
-            return df.iloc[:, 19:28]
-        elif index == 3:
-            return df.iloc[:, 7:16]
 
     def remove_outliers_with_labels(self, df, y):
         Q1 = df.quantile(0.25)
@@ -49,7 +36,19 @@ class Preprocessing_Classify():
 
         return df_no_outliers, y_filtered
 
-    def pca_reduction(self, df, threshold=0.9, dim_redu_count=1, show_plots=True):
+    def remove_outliers(self, df):
+        Q1 = df.quantile(0.25)
+        Q3 = df.quantile(0.75)
+        IQR = Q3 - Q1
+
+        lower_limit = Q1 - 1.5 * IQR
+        upper_limit = Q3 + 1.5 * IQR
+
+        mask = ((df >= lower_limit) & (df <= upper_limit)).all(axis=1)
+        return df[mask]
+
+    def pca_reduction(self, df, threshold=0.9, dim_redu_count=1, show_plots=False):
+        df = df.dropna()
         scaled_data = preprocessing.scale(df)
         pca = PCA()
         pca.fit(scaled_data)
@@ -96,50 +95,31 @@ class Preprocessing_Classify():
         )
         return x_train, x_valid, y_train, y_valid
 
-    def remove_outliers(self, df):
-        Q1 = df.quantile(0.25)
-        Q3 = df.quantile(0.75)
-        IQR = Q3 - Q1
-
-        lower_limit = Q1 - 1.5 * IQR
-        upper_limit = Q3 + 1.5 * IQR
-
-        mask = ((df >= lower_limit) & (df <= upper_limit)).all(axis=1)
-        return df[mask]
-
     def compute_eda(self):
-        x = self.dfs
-        y = self.y
-        x_test = self.x_test
-
         X_train_list = []
         X_valid_list = []
         y_train_list = []
         y_valid_list = []
 
-        for index, df in enumerate(x):
-            df = self.cut_inner_ring(df, index)
-
-            y_series = pd.Series(y[index])
+        for i, df in enumerate(self.dfs):
+            y_series = pd.Series(self.y[i])
 
             df, y_series = self.remove_outliers_with_labels(df, y_series)
-
+            df = df.fillna(df.mean())
             df = self.standardize_df(df)
-            df = self.pca_reduction(df, threshold=1, show_plots=False)
+            df = self.pca_reduction(df, threshold=1.0, show_plots=False)
 
             X_train, X_valid, y_train, y_valid = self.split_data(df, y_series)
-
             X_train_list.append(X_train)
             X_valid_list.append(X_valid)
             y_train_list.append(y_train)
             y_valid_list.append(y_valid)
 
-        x_test_processed = self.cut_inner_ring(x_test, 3)
+
+        x_test_processed = self.x_test.copy()
         x_test_processed = self.remove_outliers(x_test_processed)
+        x_test_processed = x_test_processed.fillna(x_test_processed.mean())
         x_test_processed = self.standardize_df(x_test_processed)
-        x_test_processed = self.pca_reduction(x_test_processed, threshold=1, show_plots=False)
+        x_test_processed = self.pca_reduction(x_test_processed, threshold=1.0, show_plots=False)
 
         return X_train_list, X_valid_list, y_train_list, y_valid_list, x_test_processed
-
-
-

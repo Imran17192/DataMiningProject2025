@@ -1,6 +1,9 @@
 import json
 
 from sklearn.model_selection import train_test_split
+import os  # ← NEU
+import numpy as np  # ← NEU
+from scipy.stats import mode  # ← NEU
 
 import paths
 import pandas as pd
@@ -18,6 +21,9 @@ from scripts.classification.Classifiy import Classify
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.metrics import accuracy_score
 
 
 def load_data():
@@ -97,61 +103,37 @@ def dm_part2(df1, df2):
 
 
 def dm_part3(df_x, labels, x_test):
+    #TODO take hard average of all prediciton for final prediciotn json perhaps visualize predictions
+
     prepare = Preprocessing_Classify(df_x, labels, x_test)
     X_train_list, X_valid_list, y_train_list, y_valid_list, x_test_processed = prepare.compute_eda()
 
-    print("\n=== Datenformen ===")
-    for i in range(len(X_train_list)):
-        print(f"\n--- Datensatz {i} ---")
-        print(f"X_train: {X_train_list[i].shape}")
-        print(f"X_valid: {X_valid_list[i].shape}")
-        print(f"y_train: {y_train_list[i].shape}")
-        print(f"y_valid: {y_valid_list[i].shape}")
-    print(f"\nPreprocessed x_test: {x_test_processed.shape}")
+    gnb = Classify(X_train_list[0], y_train_list[0], X_valid_list[0], y_valid_list[0], model_type="gnb")
+    gnb.train_gnb()
 
-    # ========== ALLE MODELLE TRAINIEREN ========== #
-    model_types = ["svm", "tree", "gnb", "mlp", "rf", "knn", "logreg"]
-    models = {}
-    predictions_test = {}
+    knn = Classify(X_train_list[0], y_train_list[0], X_valid_list[0], y_valid_list[0], model_type="knn")
+    knn.train_knn()
 
-    for model_type in model_types:
-        print(f"\n=== {model_type.upper()} ===")
-        model = Classify(
-            X_train_list[0], y_train_list[0],
-            X_valid_list[0], y_valid_list[0],
-            model_type=model_type
-        )
-        y_pred = model.predict(x_test_processed)
-        model.save_predictions(y_pred, path=f"{model_type}_prediction.json")
-        models[model_type] = model
-        predictions_test[model_type] = y_pred
+    ran = Classify(X_train_list[0], y_train_list[0],
+                  X_valid_list[0], y_valid_list[0],
+                  model_type="rf")
+    ran.train_rf()
 
-    # ========== VISUALISIERUNG: CONFUSION-MATRICES ========== #
-    for model_type in model_types:
-        model = models[model_type]
-        y_valid = y_valid_list[0]
-        y_pred_valid = model.model.predict(X_valid_list[0])
-        cm = confusion_matrix(y_valid, y_pred_valid)
+    lr = Classify(X_train_list[0], y_train_list[0],
+        X_valid_list[0], y_valid_list[0],
+        model_type="logreg")
+    lr.train_logreg()
 
-        plt.figure(figsize=(10, 8))
-        sns.heatmap(cm, annot=False, cmap="Blues")
-        plt.title(f"Confusion Matrix – {model_type.upper()} (Validierungsdaten)")
-        plt.xlabel("Vorhergesagt")
-        plt.ylabel("Tatsächlich")
-        plt.tight_layout()
-        plt.show()
+    svm = Classify(
+        X_train_list[0], y_train_list[0],
+        X_valid_list[0], y_valid_list[0],
+        model_type="svm"
+    )
+    svm.train_svm()
 
-    accuracies = [models[m].last_accuracy for m in model_types]
-    plt.bar(model_types, accuracies)
-    plt.title("Accuracy Vergleich")
-    plt.ylabel("Accuracy")
-    plt.xlabel("Modelltyp")
-    plt.ylim(0, 1)
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.show()
 
-    return models, predictions_test
+
+    return
 
 
 if __name__ == "__main__":
