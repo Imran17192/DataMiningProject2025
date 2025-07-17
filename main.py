@@ -1,6 +1,9 @@
 import json
 
 from sklearn.model_selection import train_test_split
+import os  # ← NEU
+import numpy as np  # ← NEU
+from scipy.stats import mode  # ← NEU
 
 import paths
 import pandas as pd
@@ -12,6 +15,15 @@ from scripts.train.HierarchicalClustering import HierarchicalClustering
 from scripts.train.kMeans import kMeans
 from scripts.unsupervised_learning.Clustering import Clustering
 from scripts.visualization.Visualization import Visualization
+
+from scripts.preprocess.Preprocessing_Classify import Preprocessing_Classify
+from scripts.classification.Classifiy import Classify
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.metrics import accuracy_score
 
 
 def load_data():
@@ -43,12 +55,16 @@ def load_labels():
     return labels
 
 
+def load_test():
+    return pd.read_json(paths.X_TEST)
+
+
 def dm_part1(df_x, df_ds1):
     eda_x = ExplorativeDataAnalysis(df_x)
-    eda_x_df = eda_x.compute_eda("x_data_frame", plot=False,clean=True)
+    eda_x_df = eda_x.compute_eda("x_data_frame", plot=False, clean=True)
 
     eda_da1 = ExplorativeDataAnalysis(df_ds1)
-    eda_da1_df = eda_da1.compute_eda("x_data_frame", plot=False,clean=True)
+    eda_da1_df = eda_da1.compute_eda("x_data_frame", plot=False, clean=True)
 
     feature_engineered_x = FeatureEngineering(eda_x_df)
     pca_x = feature_engineered_x.compute_features(show_plots=False)
@@ -87,43 +103,47 @@ def dm_part2(df1, df2):
         kmean.em_gaussian_mixture(df, n_components=3)
 
 
-def dm_part3(df_x, labels):
-    # Verschmelzen
-    dataframes_labeled = [dataframe.copy() for dataframe in df_x]
-    for x, y in zip(dataframes_labeled, labels):
-        x['y'] = y
+def dm_part3(df_x, labels, x_test):
 
-    # Vorverarbeiten
-    dataframes_labeled_preprocessed=[]
-    for dataframe in dataframes_labeled:
-        dataframe_cleaned = Preprocessing.remove_outliers_labels(dataframe, labels_column='y')
-        x = dataframe_cleaned.drop(columns=['y'])
-        y = dataframe_cleaned['y']
-        dataframe_standardized = Preprocessing.standardize(x)
-        dataframe_preprocessed = Preprocessing.principal_component_analysis(dataframe_standardized, main_components=3)
-        dataframe_preprocessed['y'] = y.values
-        dataframes_labeled_preprocessed.append(dataframe_preprocessed)
+    prepare = Preprocessing_Classify(df_x, labels, x_test)
+    X_train_list, X_valid_list, y_train_list, y_valid_list, x_test_processed = prepare.compute_eda()
 
-    # Split 70-30
-    dataframes_train = []
-    dataframes_test = []
-    for dataframe in dataframes_labeled_preprocessed:
-        x = dataframe.drop(columns=['y'])
-        y = dataframe['y']
-        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42)
-        dataframe_train = pd.concat([x_train, y_train], axis=1)
-        dataframe_test = pd.concat([x_test, y_test], axis=1)
-        dataframes_train.append(dataframe_train)
-        dataframes_test.append(dataframe_test)
+    y_test_preds = []
+
+    svm = Classify(X_train_list[0], y_train_list[0], X_valid_list[0], y_valid_list[0], model_type="svm")
+    svm.train_svm()
+    y_test_preds.append(svm.y_test_pred)
+
+
+    lr = Classify(X_train_list[0], y_train_list[0], X_valid_list[0], y_valid_list[0], model_type="logreg")
+    lr.train_logreg()
+    y_test_preds.append(lr.y_test_pred)
+
+    gnb = Classify(X_train_list[0], y_train_list[0], X_valid_list[0], y_valid_list[0], model_type="gnb")
+    gnb.train_gnb()
+    y_test_preds.append(gnb.y_test_pred)
+
+    knn = Classify(X_train_list[0], y_train_list[0], X_valid_list[0], y_valid_list[0], model_type="knn")
+    knn.train_knn()
+    y_test_preds.append(knn.y_test_pred)
+
+    np_y_test_preds = np.array(y_test_preds)
+
+    most_frequent_y_preds = mode(np_y_test_preds, axis=0, keepdims=False).mode
+    Classify.save_predictions(most_frequent_y_preds, path = "predictions/average_prediction.json")
+
+    Classify.visualize_prediction_embedding(X_train_list[0], y_train_list[0], most_frequent_y_preds, title="Average Test-Prediction")
+    Classify.visualize_prediction_embedding_3d(X_train_list[0], y_train_list[0], most_frequent_y_preds, title="Average Test-Prediction 3D")
 
 
 if __name__ == "__main__":
     df_x, df_ds1 = load_data()
 
-    #df_x_preprocessed, df_ds1_preprocessed = dm_part1(df_x, df_ds1)
+    # df_x_preprocessed, df_ds1_preprocessed = dm_part1(df_x, df_ds1)
 
-    #dm_part2(df_x_preprocessed, df_ds1_preprocessed)
+    # dm_part2(df_x_preprocessed, df_ds1_preprocessed)
 
     labels_y = load_labels()
+    x_test = load_test()
 
-    dm_part3(df_x, labels_y)
+    dm_part3(df_x, labels_y, x_test)
