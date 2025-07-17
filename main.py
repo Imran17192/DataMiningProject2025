@@ -54,16 +54,17 @@ def load_labels():
             labels.append(y)
     return labels
 
+
 def load_test():
     return pd.read_json(paths.X_TEST)
 
 
 def dm_part1(df_x, df_ds1):
     eda_x = ExplorativeDataAnalysis(df_x)
-    eda_x_df = eda_x.compute_eda("x_data_frame", plot=False,clean=True)
+    eda_x_df = eda_x.compute_eda("x_data_frame", plot=False, clean=True)
 
     eda_da1 = ExplorativeDataAnalysis(df_ds1)
-    eda_da1_df = eda_da1.compute_eda("x_data_frame", plot=False,clean=True)
+    eda_da1_df = eda_da1.compute_eda("x_data_frame", plot=False, clean=True)
 
     feature_engineered_x = FeatureEngineering(eda_x_df)
     pca_x = feature_engineered_x.compute_features(show_plots=False)
@@ -103,10 +104,15 @@ def dm_part2(df1, df2):
 
 
 def dm_part3(df_x, labels, x_test):
-    #TODO take hard average of all prediciton for final prediciotn json perhaps visualize predictions
 
     prepare = Preprocessing_Classify(df_x, labels, x_test)
     X_train_list, X_valid_list, y_train_list, y_valid_list, x_test_processed = prepare.compute_eda()
+
+    svm = Classify(X_train_list[0], y_train_list[0], X_valid_list[0], y_valid_list[0], model_type="svm")
+    svm.train_svm()
+
+    lr = Classify(X_train_list[0], y_train_list[0], X_valid_list[0], y_valid_list[0], model_type="logreg")
+    lr.train_logreg()
 
     gnb = Classify(X_train_list[0], y_train_list[0], X_valid_list[0], y_valid_list[0], model_type="gnb")
     gnb.train_gnb()
@@ -114,23 +120,7 @@ def dm_part3(df_x, labels, x_test):
     knn = Classify(X_train_list[0], y_train_list[0], X_valid_list[0], y_valid_list[0], model_type="knn")
     knn.train_knn()
 
-    ran = Classify(X_train_list[0], y_train_list[0],
-                  X_valid_list[0], y_valid_list[0],
-                  model_type="rf")
-    ran.train_rf()
-
-    lr = Classify(X_train_list[0], y_train_list[0],
-        X_valid_list[0], y_valid_list[0],
-        model_type="logreg")
-    lr.train_logreg()
-
-    svm = Classify(
-        X_train_list[0], y_train_list[0],
-        X_valid_list[0], y_valid_list[0],
-        model_type="svm"
-    )
-    svm.train_svm()
-
+    # TODO take hard average of all prediciton for final prediciotn json perhaps visualize predictions
 
 
     return
@@ -139,10 +129,9 @@ def dm_part3(df_x, labels, x_test):
 if __name__ == "__main__":
     df_x, df_ds1 = load_data()
 
-    #df_x_preprocessed, df_ds1_preprocessed = dm_part1(df_x, df_ds1)
+    # df_x_preprocessed, df_ds1_preprocessed = dm_part1(df_x, df_ds1)
 
-    #dm_part2(df_x_preprocessed, df_ds1_preprocessed)
-
+    # dm_part2(df_x_preprocessed, df_ds1_preprocessed)
 
     labels_y = load_labels()
     x_test = load_test()
