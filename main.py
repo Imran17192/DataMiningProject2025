@@ -114,6 +114,7 @@ def dm_part3(df_x, labels, x_test):
     svm.train_svm()
     y_test_preds.append(svm.y_test_pred)
 
+
     lr = Classify(X_train_list[0], y_train_list[0], X_valid_list[0], y_valid_list[0], model_type="logreg")
     lr.train_logreg()
     y_test_preds.append(lr.y_test_pred)
