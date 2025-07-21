@@ -1,29 +1,18 @@
 import json
-
-from sklearn.model_selection import train_test_split
-import os
-import numpy as np
-from scipy.stats import mode
-
 import paths
-import pandas as pd
 
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+
+from scipy.stats import mode
+from scripts.classification.Classifiy import Classify
 from scripts.preprocess.ExplorativeDataAnalysis import ExplorativeDataAnalysis
 from scripts.preprocess.FeatureEngineering import FeatureEngineering
-from scripts.preprocess.Preprocessing import Preprocessing
-from scripts.train.HierarchicalClustering import HierarchicalClustering
-from scripts.train.kMeans import kMeans
+from scripts.preprocess.Preprocessing_Classify import Preprocessing_Classify
 from scripts.unsupervised_learning.Clustering import Clustering
 from scripts.visualization.Visualization import Visualization
-
-from scripts.preprocess.Preprocessing_Classify import Preprocessing_Classify
-from scripts.classification.Classifiy import Classify
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.metrics import confusion_matrix
-import seaborn as sns
-import matplotlib.pyplot as plt
-from sklearn.metrics import accuracy_score
 
 
 def load_data():
@@ -230,9 +219,9 @@ def dm_part3(df_x, labels, x_test):
 if __name__ == "__main__":
     df_x, df_ds1 = load_data()
 
-    # df_x_preprocessed, df_ds1_preprocessed = dm_part1(df_x, df_ds1)
+    df_x_preprocessed, df_ds1_preprocessed = dm_part1(df_x, df_ds1)
 
-    # dm_part2(df_x_preprocessed, df_ds1_preprocessed)
+    dm_part2(df_x_preprocessed, df_ds1_preprocessed)
 
     labels_y = load_labels()
     x_test = load_test()
