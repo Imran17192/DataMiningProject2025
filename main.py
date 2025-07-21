@@ -10,7 +10,7 @@ from scipy.stats import mode
 from scripts.classification.Classify import Classify
 from scripts.preprocess.ExplorativeDataAnalysis import ExplorativeDataAnalysis
 from scripts.preprocess.FeatureEngineering import FeatureEngineering
-from scripts.preprocess.Preprocessing_Classify import Preprocessing_Classify
+from scripts.preprocess.PreprocessingClassify import PreprocessingClassify
 from scripts.unsupervised_learning.Clustering import Clustering
 from scripts.visualization.Visualization import Visualization
 
@@ -167,7 +167,7 @@ def dm_part3(df_x, labels, x_test):
     for i in range(0,3):
         quadratic_heatmap_dataset_two(df_x[i], labels[i])
 
-    prepare = Preprocessing_Classify(df_x, labels, x_test)
+    prepare = PreprocessingClassify(df_x, labels, x_test)
     X_train_list, X_valid_list, y_train_list, y_valid_list, x_test_processed = prepare.compute_eda()
 
     X_full = pd.concat([X_train_list[0], X_valid_list[0]], ignore_index=True)

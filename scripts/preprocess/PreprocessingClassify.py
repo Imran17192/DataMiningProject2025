@@ -11,7 +11,7 @@ from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split
 
 
-class Preprocessing_Classify:
+class PreprocessingClassify:
     def __init__(self, dfs, y, x_test):
         self.dfs = dfs
         self.y = y
