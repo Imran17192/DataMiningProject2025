@@ -21,7 +21,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
-from mpl_toolkits.mplot3d import Axes3D  # wichtig für 3D-Plots
+from mpl_toolkits.mplot3d import Axes3D
 
 
 class Classify:
@@ -38,7 +38,7 @@ class Classify:
 
         self.choose_model(model_type)
 
-    # How to chose parameters ?
+
     def choose_model(self, model_type):
         if model_type == "svm":
             self.model = SVC(kernel="rbf", C=10, gamma=0.01, probability=True)
