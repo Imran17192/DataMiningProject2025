@@ -1,18 +1,17 @@
 import matplotlib
-from kneed import KneeLocator
-from sklearn.decomposition import PCA
-from sklearn.neighbors import NearestNeighbors
 
 matplotlib.use("TkAgg")
 
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.cluster import MiniBatchKMeans, AgglomerativeClustering
 import skfuzzy as fuzz
-from sklearn.mixture import GaussianMixture
 
-from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
+from kneed import KneeLocator
+from sklearn.cluster import MiniBatchKMeans, KMeans, DBSCAN, AgglomerativeClustering
+from sklearn.decomposition import PCA
 from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
+from sklearn.mixture import GaussianMixture
+from sklearn.neighbors import NearestNeighbors
 
 
 def plot_3d_pca(df, labels, title):
