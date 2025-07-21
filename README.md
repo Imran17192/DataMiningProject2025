@@ -24,10 +24,6 @@ Die Datei paths.py enthält einige Konstanten, welche die Projektstruktur reprä
 
 Der data-Ordner enthält vorgegebenen Daten für das Data Mining.
 
-## Vorbereitung
-
-Um die benötigten Packages zu installieren den Befehl `python3 -m pip install requirements.txt` ausführen.
-
 ### plots
 
 Der plots-Ordner enthält die bei der bzw. für die Datenanalyse generierten Plots.
@@ -39,6 +35,10 @@ Der predictions-Ordner enthält die bei der Klassifikation generierten Predictio
 ### scripts
 
 Der scripts-Ordner ist modular aufgebaut und enthält für verschiedene Aspekte des Data Mining entsprechende Unterordner, welche py-Dateien enthalten, die von der Datei main.py importiert werden und die für das Data Mining benötigten Funktionen implementieren.
+
+## Vorbereitung
+
+Um die benötigten Packages zu installieren den Befehl `python3 -m pip install requirements.txt` ausführen.
 
 ## Ausführung
 Ausführung des Codes über den Befehl `python3 main.py`.
