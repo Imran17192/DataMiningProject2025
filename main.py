@@ -111,7 +111,6 @@ def plot_label_feature_heatmap(X, labels, title="Heatmap"):
 
 
 def plot_label_gallery_single(df, labels):
-    print("hello")
     df = df.copy()
     df["label"] = labels
 
