@@ -98,18 +98,6 @@ def plot_label_distribution(labels, title="Label‑Verteilung"):
     plt.show()
 
 
-def plot_label_feature_heatmap(X, labels, title="Heatmap"):
-    df = X.copy()
-    df["label"] = labels
-    mean_per_label = df.groupby("label").mean().sort_index()
-    sns.heatmap(mean_per_label, cmap="viridis", cbar_kws=dict(label="Feature‑Mittelwert"))
-    plt.title(title)
-    plt.ylabel("Label‑Klasse")
-    plt.xlabel("Feature")
-    plt.tight_layout()
-    plt.show()
-
-
 def plot_label_gallery_single(df, labels):
     df = df.copy()
     df["label"] = labels
@@ -186,7 +174,6 @@ def dm_part3(df_x, labels, x_test):
     y_full = np.concatenate([y_train_list[0], y_valid_list[0]])
 
     plot_label_distribution(y_full, "Label‑Verteilung (Trainingalid)")
-    plot_label_feature_heatmap(X_full, y_full, "Heatmap der durchschnittlichen Feature‑Werte pro Label (Train+Valid)")
 
     y_test_preds = []
 
