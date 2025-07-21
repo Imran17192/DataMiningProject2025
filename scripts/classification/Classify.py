@@ -1,27 +1,17 @@
 import json
 
 import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
+import seaborn as sns
+
+from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
 from sklearn.manifold import TSNE
-from sklearn.model_selection import GridSearchCV
-
-from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
-from sklearn.decomposition import PCA
-from sklearn.metrics import roc_curve, auc
-
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score
-
-from sklearn.ensemble import RandomForestClassifier
-
-from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
-from mpl_toolkits.mplot3d import Axes3D  # wichtig für 3D-Plots
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
 
 
 class Classify:
@@ -38,7 +28,7 @@ class Classify:
 
         self.choose_model(model_type)
 
-    # How to chose parameters ?
+
     def choose_model(self, model_type):
         if model_type == "svm":
             self.model = SVC(kernel="rbf", C=10, gamma=0.01, probability=True)

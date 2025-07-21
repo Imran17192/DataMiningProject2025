@@ -1,29 +1,18 @@
 import json
-
-from sklearn.model_selection import train_test_split
-import os
-import numpy as np
-from scipy.stats import mode
-
 import paths
-import pandas as pd
 
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+
+from scipy.stats import mode
+from scripts.classification.Classify import Classify
 from scripts.preprocess.ExplorativeDataAnalysis import ExplorativeDataAnalysis
 from scripts.preprocess.FeatureEngineering import FeatureEngineering
-from scripts.preprocess.Preprocessing import Preprocessing
-from scripts.train.HierarchicalClustering import HierarchicalClustering
-from scripts.train.kMeans import kMeans
+from scripts.preprocess.PreprocessingClassify import PreprocessingClassify
 from scripts.unsupervised_learning.Clustering import Clustering
 from scripts.visualization.Visualization import Visualization
-
-from scripts.preprocess.Preprocessing_Classify import Preprocessing_Classify
-from scripts.classification.Classifiy import Classify
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.metrics import confusion_matrix
-import seaborn as sns
-import matplotlib.pyplot as plt
-from sklearn.metrics import accuracy_score
 
 
 def load_data():
@@ -109,20 +98,7 @@ def plot_label_distribution(labels, title="Label‑Verteilung"):
     plt.show()
 
 
-def plot_label_feature_heatmap(X, labels, title="Heatmap"):
-    df = X.copy()
-    df["label"] = labels
-    mean_per_label = df.groupby("label").mean().sort_index()
-    sns.heatmap(mean_per_label, cmap="viridis", cbar_kws=dict(label="Feature‑Mittelwert"))
-    plt.title(title)
-    plt.ylabel("Label‑Klasse")
-    plt.xlabel("Feature")
-    plt.tight_layout()
-    plt.show()
-
-
 def plot_label_gallery_single(df, labels):
-    print("hello")
     df = df.copy()
     df["label"] = labels
 
@@ -191,14 +167,13 @@ def dm_part3(df_x, labels, x_test):
     for i in range(0,3):
         quadratic_heatmap_dataset_two(df_x[i], labels[i])
 
-    prepare = Preprocessing_Classify(df_x, labels, x_test)
+    prepare = PreprocessingClassify(df_x, labels, x_test)
     X_train_list, X_valid_list, y_train_list, y_valid_list, x_test_processed = prepare.compute_eda()
 
     X_full = pd.concat([X_train_list[0], X_valid_list[0]], ignore_index=True)
     y_full = np.concatenate([y_train_list[0], y_valid_list[0]])
 
     plot_label_distribution(y_full, "Label‑Verteilung (Trainingalid)")
-    plot_label_feature_heatmap(X_full, y_full, "Heatmap der durchschnittlichen Feature‑Werte pro Label (Train+Valid)")
 
     y_test_preds = []
 
@@ -230,9 +205,9 @@ def dm_part3(df_x, labels, x_test):
 if __name__ == "__main__":
     df_x, df_ds1 = load_data()
 
-    # df_x_preprocessed, df_ds1_preprocessed = dm_part1(df_x, df_ds1)
+    df_x_preprocessed, df_ds1_preprocessed = dm_part1(df_x, df_ds1)
 
-    # dm_part2(df_x_preprocessed, df_ds1_preprocessed)
+    dm_part2(df_x_preprocessed, df_ds1_preprocessed)
 
     labels_y = load_labels()
     x_test = load_test()

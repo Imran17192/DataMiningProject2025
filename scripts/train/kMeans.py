@@ -1,6 +1,5 @@
-from sklearn.cluster import KMeans
-
 from kneed import KneeLocator
+from sklearn.cluster import KMeans
 
 class kMeans:
 

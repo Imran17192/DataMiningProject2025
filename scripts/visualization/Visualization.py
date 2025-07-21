@@ -1,5 +1,5 @@
-import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+import matplotlib.pyplot as plt
 import numpy as np
 
 from matplotlib.patches import Patch

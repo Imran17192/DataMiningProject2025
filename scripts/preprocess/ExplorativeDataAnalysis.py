@@ -1,14 +1,15 @@
-import matplotlib
-matplotlib.use('TkAgg')
-import matplotlib.pyplot as plt
 import math
+import matplotlib
+
+matplotlib.use('TkAgg')
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import seaborn as sns
+
 from sklearn import preprocessing
 from sklearn.decomposition import PCA
-import matplotlib.pyplot as plt
-from sklearn.preprocessing import KBinsDiscretizer
-import pandas as pd
-import numpy as np
 
 class ExplorativeDataAnalysis:
     def __init__(self, dfs):
