@@ -24,7 +24,6 @@ from sklearn.naive_bayes import GaussianNB
 from mpl_toolkits.mplot3d import Axes3D  # wichtig für 3D-Plots
 
 
-
 class Classify:
     def __init__(self, X_train, y_train, X_valid=None, y_valid=None, model_type="svm"):
         self.X_train = X_train
@@ -39,13 +38,12 @@ class Classify:
 
         self.choose_model(model_type)
 
-
     # How to chose parameters ?
     def choose_model(self, model_type):
         if model_type == "svm":
             self.model = SVC(kernel="rbf", C=10, gamma=0.01, probability=True)
         elif model_type == "logreg":
-            self.model = LogisticRegression(multi_class='multinomial', solver='lbfgs',max_iter=500, random_state=42)
+            self.model = LogisticRegression(multi_class='multinomial', solver='lbfgs', max_iter=500, random_state=42)
         elif model_type == "knn":
             self.model = KNeighborsClassifier(n_neighbors=5, metric="minkowski", p=2)
         elif model_type == "gnb":
@@ -53,24 +51,28 @@ class Classify:
         else:
             raise ValueError(f"Unbekannter Modelltyp: {model_type}")
 
-    def train_svm(self):
+    def train_svm(self, plot=False):
         self.model.fit(self.X_train, self.y_train)
         if self.X_valid is not None and self.y_valid is not None:
             y_pred = self.model.predict(self.X_valid)
             acc = accuracy_score(self.y_valid, y_pred)
             print(f"[SVM] Accuracy: {acc:.4f}")
 
-            self.visualize_confusion_matrix(self.y_valid, y_pred, "SVM Confusion")
-            self.visualize_prediction_embedding(self.X_valid, self.y_valid, y_pred, title="SVM Prediction")
-            self.visualize_prediction_embedding_3d(self.X_valid, self.y_valid, y_pred, title= "SVM Prediction 3d")
-            self.plot_svm_decision_boundary()
+            if plot:
+                self.visualize_confusion_matrix(self.y_valid, y_pred, "SVM Confusion")
+                self.visualize_prediction_embedding(self.X_valid, self.y_valid, y_pred, title="SVM Prediction")
+                self.visualize_prediction_embedding_3d(self.X_valid, self.y_valid, y_pred, title="SVM Prediction 3d")
+                self.plot_svm_decision_boundary()
 
         self.y_test_pred = self.model.predict(self.X_train)
-        self.visualize_prediction_embedding(self.X_train, self.y_train, self.y_test_pred, title="SVM Test-Prediction")
-        self.visualize_prediction_embedding_3d(self.X_train, self.y_train, self.y_test_pred, title="SVM Test-Prediction 3D")
+        if plot:
+            self.visualize_prediction_embedding(self.X_train, self.y_train, self.y_test_pred,
+                                                title="SVM Test-Prediction")
+            self.visualize_prediction_embedding_3d(self.X_train, self.y_train, self.y_test_pred,
+                                                   title="SVM Test-Prediction 3D")
         self.save_predictions(self.y_test_pred, path="predictions/svm_prediction.json")
 
-    def train_logreg(self):
+    def train_logreg(self, plot=False):
         if not isinstance(self.model, LogisticRegression):
             raise TypeError("Nur für LogisticRegression verfügbar.")
 
@@ -82,16 +84,20 @@ class Classify:
             loss = log_loss(self.y_valid, self.model.predict_proba(self.X_valid))
             print(f"[LOGREG] Accuracy: {acc:.4f} | LogLoss: {loss:.4f}")
 
-            self.visualize_confusion_matrix(self.y_valid, y_pred, title="Confusion Matrix – Logistic Regression")
-            self.visualize_prediction_embedding(self.X_valid, self.y_valid, y_pred, title="LogReg Prediction")
-            self.visualize_prediction_embedding_3d(self.X_valid, self.y_valid, y_pred, title="LogReg Prediction 3d")
+            if plot:
+                self.visualize_confusion_matrix(self.y_valid, y_pred, title="Confusion Matrix – Logistic Regression")
+                self.visualize_prediction_embedding(self.X_valid, self.y_valid, y_pred, title="LogReg Prediction")
+                self.visualize_prediction_embedding_3d(self.X_valid, self.y_valid, y_pred, title="LogReg Prediction 3d")
 
         self.y_test_pred = self.model.predict(self.X_train)
-        self.visualize_prediction_embedding(self.X_train, self.y_train, self.y_test_pred, title="LogReg Test-Prediction")
-        self.visualize_prediction_embedding_3d(self.X_train, self.y_train, self.y_test_pred, title="LogReg Test-Prediction 3D")
+        if plot:
+            self.visualize_prediction_embedding(self.X_train, self.y_train, self.y_test_pred,
+                                                title="LogReg Test-Prediction")
+            self.visualize_prediction_embedding_3d(self.X_train, self.y_train, self.y_test_pred,
+                                                   title="LogReg Test-Prediction 3D")
         self.save_predictions(self.y_test_pred, path="predictions/logreg_prediction.json")
 
-    def train_gnb(self):
+    def train_gnb(self, plot=False):
         if not isinstance(self.model, GaussianNB):
             raise TypeError("Nur für GaussianNB verfügbar.")
 
@@ -102,16 +108,20 @@ class Classify:
             acc = accuracy_score(self.y_valid, y_pred)
             print(f"[GNB] Accuracy: {acc:.4f}")
 
-            self.visualize_confusion_matrix(self.y_valid, y_pred, title="Confusion Matrix – Naive Bayes")
-            self.visualize_prediction_embedding(self.X_valid, self.y_valid, y_pred, title="GNB Prediction")
-            self.visualize_prediction_embedding_3d(self.X_valid, self.y_valid, y_pred, title="GNB Prediction 3d")
+            if plot:
+                self.visualize_confusion_matrix(self.y_valid, y_pred, title="Confusion Matrix – Naive Bayes")
+                self.visualize_prediction_embedding(self.X_valid, self.y_valid, y_pred, title="GNB Prediction")
+                self.visualize_prediction_embedding_3d(self.X_valid, self.y_valid, y_pred, title="GNB Prediction 3d")
 
         self.y_test_pred = self.model.predict(self.X_train)
-        self.visualize_prediction_embedding(self.X_train, self.y_train, self.y_test_pred, title="GNB Test-Prediction")
-        self.visualize_prediction_embedding_3d(self.X_train, self.y_train, self.y_test_pred, title="GNB Test-Prediction 3D")
+        if plot:
+            self.visualize_prediction_embedding(self.X_train, self.y_train, self.y_test_pred,
+                                                title="GNB Test-Prediction")
+            self.visualize_prediction_embedding_3d(self.X_train, self.y_train, self.y_test_pred,
+                                                   title="GNB Test-Prediction 3D")
         self.save_predictions(self.y_test_pred, path="predictions/gnb_prediction.json")
 
-    def train_knn(self):
+    def train_knn(self, plot=False):
         if not isinstance(self.model, KNeighborsClassifier):
             raise TypeError("Nur für KNeighborsClassifier verfügbar.")
 
@@ -123,16 +133,19 @@ class Classify:
             f1 = f1_score(self.y_valid, y_pred, average="weighted")
             print(f"[KNN] Accuracy: {acc:.4f} ")
 
-            self.visualize_confusion_matrix(self.y_valid, y_pred, title="Confusion Matrix – k-NN")
-            self.visualize_prediction_embedding(self.X_valid, self.y_valid, y_pred, title="KNN Prediction")
-            self.visualize_prediction_embedding_3d(self.X_valid, self.y_valid, y_pred, title="KNN Prediction 3d")
-            self.plot_knn_decision_boundary()
+            if plot:
+                self.visualize_confusion_matrix(self.y_valid, y_pred, title="Confusion Matrix – k-NN")
+                self.visualize_prediction_embedding(self.X_valid, self.y_valid, y_pred, title="KNN Prediction")
+                self.visualize_prediction_embedding_3d(self.X_valid, self.y_valid, y_pred, title="KNN Prediction 3d")
+                self.plot_knn_decision_boundary()
 
         self.y_test_pred = self.model.predict(self.X_train)
-        self.visualize_prediction_embedding(self.X_train, self.y_train, self.y_test_pred, title="KNN Test-Prediction")
-        self.visualize_prediction_embedding_3d(self.X_train, self.y_train, self.y_test_pred, title="KNN Test-Prediction 3D")
+        if plot:
+            self.visualize_prediction_embedding(self.X_train, self.y_train, self.y_test_pred,
+                                                title="KNN Test-Prediction")
+            self.visualize_prediction_embedding_3d(self.X_train, self.y_train, self.y_test_pred,
+                                                   title="KNN Test-Prediction 3D")
         self.save_predictions(self.y_test_pred, path="predictions/knn_prediction.json")
-
 
     def predict(self, X):
         return self.model.predict(X)

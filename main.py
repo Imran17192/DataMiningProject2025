@@ -1,9 +1,9 @@
 import json
 
 from sklearn.model_selection import train_test_split
-import os  # ← NEU
-import numpy as np  # ← NEU
-from scipy.stats import mode  # ← NEU
+import os
+import numpy as np
+from scipy.stats import mode
 
 import paths
 import pandas as pd
@@ -40,9 +40,6 @@ def load_data():
     for p in paths.DS1_DIR:
         df = pd.read_json(p)
         df_ds1.append(df)
-
-    # DS2 not a pandas datframe so do it later. it is also just  for puzzle
-
     return df_x, df_ds1
 
 
@@ -102,38 +99,132 @@ def dm_part2(df1, df2):
         kmean.mini_batch_kmeans(df, k=3)
         kmean.em_gaussian_mixture(df, n_components=3)
 
+def plot_label_distribution(labels, title="Label‑Verteilung"):
+    vc = pd.Series(labels).value_counts().sort_index()
+    plt.figure(figsize=(10, 4))
+    sns.barplot(x=vc.index, y=vc.values, palette="tab20")
+    plt.xlabel("Label")
+    plt.ylabel("Anzahl")
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_label_feature_heatmap(X, labels, title="Heatmap"):
+    df = X.copy()
+    df["label"] = labels
+    mean_per_label = df.groupby("label").mean().sort_index()
+    sns.heatmap(mean_per_label, cmap="viridis", cbar_kws=dict(label="Feature‑Mittelwert"))
+    plt.title(title)
+    plt.ylabel("Label‑Klasse")
+    plt.xlabel("Feature")
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_label_gallery_single(df, labels):
+    print("hello")
+    df = df.copy()
+    df["label"] = labels
+
+    label_ids = sorted(df["label"].unique())
+    num_labels = len(label_ids)
+
+    fig, axs = plt.subplots(nrows=(num_labels + 4) // 5, ncols=5, figsize=(15, num_labels // 2))
+    axs = axs.flatten()
+
+    for i, label in enumerate(label_ids):
+        sample = df[df["label"] == label].iloc[0, :-1].values
+        side = int(np.sqrt(len(sample)))
+        matrix = sample[:side * side].reshape(side, side)
+
+        sns.heatmap(matrix, ax=axs[i], cmap="viridis", cbar=False,
+                    xticklabels=False, yticklabels=False)
+        axs[i].set_title(f"Label {label}", fontsize=9)
+
+    for ax in axs[num_labels:]:
+        ax.axis("off")
+
+    plt.suptitle("Heatmap pro Klasse – 1 Beispiel je Label", fontsize=16)
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    plt.show()
+
+def quadratic_heatmap_dataset_two(df_x, labels, dataset_name="Dataset"):
+    df = df_x.copy()
+    df["label"] = labels
+
+    selected_labels = [5, 20, 29]
+
+    for lbl in selected_labels:
+        df_label = df[df["label"] == lbl]
+        n = min(len(df_label), 8)
+        if n == 0:
+            print(f"Keine Objekte mit Label {lbl} in {dataset_name}.")
+            continue
+
+        fig, axs = plt.subplots(2, 4, figsize=(20, 6))
+        axs = axs.flatten()
+
+        for i in range(n):
+            feature_vector = df_label.iloc[i, :-1].values
+            side = int(np.sqrt(feature_vector.size))
+            matrix = feature_vector[:side*side].reshape(side, side)
+
+            sns.heatmap(
+                matrix,
+                cmap="viridis",
+                cbar=True,
+                xticklabels=False, yticklabels=False,
+                ax=axs[i]
+            )
+            axs[i].set_title(f"{dataset_name} - Label {lbl}, Index {df_label.index[i]}")
+            axs[i].set_xlabel(f"{side}×{side}")
+
+        for ax in axs[n:]:
+            ax.axis("off")
+
+        fig.suptitle(f"Heatmaps der ersten Objekte mit Label {lbl} ({dataset_name})", fontsize=16)
+        plt.tight_layout(rect=[0, 0, 1, 0.95])
+        plt.show()
+    plot_label_gallery_single(df, labels)
 
 def dm_part3(df_x, labels, x_test):
+    for i in range(0,3):
+        quadratic_heatmap_dataset_two(df_x[i], labels[i])
 
     prepare = Preprocessing_Classify(df_x, labels, x_test)
     X_train_list, X_valid_list, y_train_list, y_valid_list, x_test_processed = prepare.compute_eda()
+
+    X_full = pd.concat([X_train_list[0], X_valid_list[0]], ignore_index=True)
+    y_full = np.concatenate([y_train_list[0], y_valid_list[0]])
+
+    plot_label_distribution(y_full, "Label‑Verteilung (Trainingalid)")
+    plot_label_feature_heatmap(X_full, y_full, "Heatmap der durchschnittlichen Feature‑Werte pro Label (Train+Valid)")
 
     y_test_preds = []
 
     svm = Classify(X_train_list[0], y_train_list[0], X_valid_list[0], y_valid_list[0], model_type="svm")
     svm.train_svm()
-    y_test_preds.append(svm.y_test_pred)
-
+    y_test_preds.append(svm.model.predict(x_test_processed))
 
     lr = Classify(X_train_list[0], y_train_list[0], X_valid_list[0], y_valid_list[0], model_type="logreg")
     lr.train_logreg()
-    y_test_preds.append(lr.y_test_pred)
+    y_test_preds.append(lr.model.predict(x_test_processed))
 
     gnb = Classify(X_train_list[0], y_train_list[0], X_valid_list[0], y_valid_list[0], model_type="gnb")
     gnb.train_gnb()
-    y_test_preds.append(gnb.y_test_pred)
+    y_test_preds.append(gnb.model.predict(x_test_processed))
 
     knn = Classify(X_train_list[0], y_train_list[0], X_valid_list[0], y_valid_list[0], model_type="knn")
     knn.train_knn()
-    y_test_preds.append(knn.y_test_pred)
+    y_test_preds.append(knn.model.predict(x_test_processed))
 
     np_y_test_preds = np.array(y_test_preds)
-
     most_frequent_y_preds = mode(np_y_test_preds, axis=0, keepdims=False).mode
-    Classify.save_predictions(most_frequent_y_preds, path = "predictions/average_prediction.json")
 
-    Classify.visualize_prediction_embedding(X_train_list[0], y_train_list[0], most_frequent_y_preds, title="Average Test-Prediction")
-    Classify.visualize_prediction_embedding_3d(X_train_list[0], y_train_list[0], most_frequent_y_preds, title="Average Test-Prediction 3D")
+    Classify.save_predictions(most_frequent_y_preds, path="predictions/average_prediction.json")
+    plot_label_distribution(most_frequent_y_preds, "Label‑Verteilung (Ensemble‑Predictions)")
+
+    quadratic_heatmap_dataset_two(x_test_processed, most_frequent_y_preds)
 
 
 if __name__ == "__main__":
