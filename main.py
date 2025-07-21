@@ -7,7 +7,7 @@ import pandas as pd
 import seaborn as sns
 
 from scipy.stats import mode
-from scripts.classification.Classifiy import Classify
+from scripts.classification.Classify import Classify
 from scripts.preprocess.ExplorativeDataAnalysis import ExplorativeDataAnalysis
 from scripts.preprocess.FeatureEngineering import FeatureEngineering
 from scripts.preprocess.Preprocessing_Classify import Preprocessing_Classify
