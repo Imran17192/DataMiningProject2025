@@ -13,10 +13,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent.joinpath('DataMiningProject202
 
 # Path to all main folders
 DATA_DIR = BASE_DIR.joinpath('data')
-MODEL_DIR = BASE_DIR.joinpath('models')
 PLOTS_DIR = BASE_DIR.joinpath('plots')
 PREDICTIONS_DIR = BASE_DIR.joinpath('predictions')
-SCORES_DIR = BASE_DIR.joinpath('scores')
 
 # Path to raw data
 X_DIR = DATA_DIR.joinpath('x')

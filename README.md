@@ -8,23 +8,21 @@ Dieses Projekt enthält die Daten und Skripte für den Projektteil des Moduls Da
 
 ## Nutzung
 
-Dieses Projekt wird mit JetBrains' IDE PyCharm entwickelt. Alles was getan werden muss, um durch den Code zu stöbern und diesen auszuführen ist es, die IDE zu installieren und das Projekt zu importieren. Fehlende Packages werden von PyCharm heruntergeladen. Um die Datenanalyse zu starten genügt es, das Skript main.py im scripts-Ordner in PyCharm auszuführen.
+Dieses Projekt wird mit JetBrains' IDE PyCharm entwickelt. Alles was getan werden muss, um durch den Code zu stöbern, ist es, die IDE zu installieren und das Projekt zu importieren. Fehlende Packages können durch Ausführung des Befehls `python3 -m pip install requirements.txt` installiert werden. Um die Datenanalyse zu starten genügt es, das Skript main.py mit dem Befehl `python3 main.py` auszuführen.
 
 ## Projektstruktur
 
-### Paths.py
+### main.py
 
-Die Datei Paths.py enthält einige Konstanten, welche die Projektstruktur repräsentieren, sowie eine Funktion, welche für einen gegebenen Pfad eine Liste aller darin enthaltenen json-Dateien zurückgibt.
+Die Datei main.py enthält den Haupt-Programmcode. Die einzelnen Schritte des Data Mining werden dabei durch jeweilige Funktionen (dm_part\[1,2,3\]) durchgeführt
+
+### paths.py
+
+Die Datei paths.py enthält einige Konstanten, welche die Projektstruktur repräsentieren, sowie eine Funktion, welche für einen gegebenen Pfad eine Liste aller darin enthaltenen json-Dateien zurückgibt.
 
 ### data
 
 Der data-Ordner enthält vorgegebenen Daten für das Data Mining.
-
-### models
-## Vorbereitung
-Um die benötigten Packages zu installieren den Befehl `python3 -m pip install requirements.txt` ausführen.
-
-Für die zukünftige Nutzung vorgesehen.
 
 ### plots
 
@@ -32,14 +30,15 @@ Der plots-Ordner enthält die bei der bzw. für die Datenanalyse generierten Plo
 
 ### predictions
 
-Für die zukünftige Nutzung vorgesehen.
-
-### scores
-
-Für die zukünftige Nutzung vorgesehen
+Der predictions-Ordner enthält die bei der Klassifikation generierten Predictions.
 
 ### scripts
 
 Der scripts-Ordner ist modular aufgebaut und enthält für verschiedene Aspekte des Data Mining entsprechende Unterordner, welche py-Dateien enthalten, die von der Datei main.py importiert werden und die für das Data Mining benötigten Funktionen implementieren.
+
+## Vorbereitung
+
+Um die benötigten Packages zu installieren den Befehl `python3 -m pip install requirements.txt` ausführen.
+
 ## Ausführung
 Ausführung des Codes über den Befehl `python3 main.py`.
