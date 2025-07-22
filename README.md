@@ -8,7 +8,7 @@ Dieses Projekt enthält die Daten und Skripte für den Projektteil des Moduls Da
 
 ## Nutzung
 
-Dieses Projekt wird mit JetBrains' IDE PyCharm entwickelt. Alles was getan werden muss, um durch den Code zu stöbern, ist es, die IDE zu installieren und das Projekt zu importieren. Fehlende Packages können durch Ausführung des Befehls `python3 -m pip install requirements.txt` installiert werden. Um die Datenanalyse zu starten genügt es, das Skript main.py mit dem Befehl `python3 main.py` auszuführen.
+Dieses Projekt wird mit JetBrains' IDE PyCharm entwickelt. Alles was getan werden muss, um durch den Code zu stöbern, ist es, die IDE zu installieren und das Projekt zu importieren. Fehlende Packages können durch Ausführung des Befehls `python3 -m pip install -r requirements.txt` installiert werden. Um die Datenanalyse zu starten genügt es, das Skript main.py mit dem Befehl `python3 main.py` auszuführen.
 
 ## Projektstruktur
 
@@ -38,7 +38,7 @@ Der scripts-Ordner ist modular aufgebaut und enthält für verschiedene Aspekte 
 
 ## Vorbereitung
 
-Um die benötigten Packages zu installieren den Befehl `python3 -m pip install requirements.txt` ausführen.
+Um die benötigten Packages zu installieren den Befehl `python3 -m pip install -r requirements.txt` ausführen.
 
 ## Ausführung
 Ausführung des Codes über den Befehl `python3 main.py`.
